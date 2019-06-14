@@ -7,12 +7,9 @@ library(httr)
 # snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT/
 # icd9 from the ums2rdf pipeline into http://purl.bioontology.org/ontology/ICD9CM/
 # icd10 from the ums2rdf pipeline into 	http://purl.bioontology.org/ontology/ICD10CM/
-# ontorefine:
+# ontorefine source:
 # https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
-# ICD9CM_SNOMED_MAP_1TO1_201812.txt -> ontorefine:1743351501645 on laptop,
-#   ontorefine:1908476393038 on turbo-prd-db01
-# ICD9CM_SNOMED_MAP_1TOM_201812.txt -> ontorefine:2279568511296 on laptop,
-#   ontorefine:1988267734735  on turbo-prd-db01
+# but has also been saved as two projects that can be directly imported into graphdb servers
 
 
 # maybe
@@ -51,7 +48,7 @@ configurations <- list(
   )
 )
 
-selected.configuration <- "E5570"
+selected.configuration <- "turbo-prd-db01"
 selected.configuration <- configurations[[selected.configuration]]
 graphdb.address.port <- selected.configuration[[1]]
 selected.repo <- selected.configuration[[2]]
@@ -66,10 +63,91 @@ update.endpoint <-
          "/statements")
 
 api.user <- "markampa"
-api.pass <- rstudioapi::askForPassword()
+api.pass <-
+  rstudioapi::askForPassword(prompt = paste0("Password for ", api.user , " on ", graphdb.address.port , "?"))
 
 saved.authentication <-
   authenticate(api.user, api.pass, type = "basic")
+
+###   ###   ###
+
+ontorefine.prefix <- 'PREFIX mydata: <http://example.com/resource/>
+  PREFIX spif: <http://spinrdf.org/spif#>
+insert {
+  graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+    ?myRowId a <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ;
+    mydata:File ?File ;
+    mydata:ICD_CODE ?ICD_CODE ;
+    mydata:ICD_NAME ?ICD_NAME ;
+    mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
+    mydata:IP_USAGE ?IP_USAGE ;
+    mydata:OP_USAGE ?OP_USAGE ;
+    mydata:AVG_USAGE ?AVG_USAGE ;
+    mydata:IS_NEC ?IS_NEC ;
+    mydata:SNOMED_CID ?SNOMED_CID ;
+    mydata:SNOMED_FSN ?SNOMED_FSN ;
+    mydata:IS_1-1MAP ?IS_1_1MAP ;
+    mydata:CORE_USAGE ?CORE_USAGE ;
+    mydata:IN_CORE ?IN_CORE .
+  }
+} WHERE {
+  SERVICE <'
+
+ontorefine.postfix <- '> {
+    ?row a mydata:Row ;
+    mydata:File ?File ;
+    mydata:ICD_CODE ?ICD_CODE .
+    optional {
+      ?row mydata:ICD_NAME ?ICD_NAME ;
+    }
+    optional {
+      ?row mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
+    }
+    optional {
+      ?row  mydata:IP_USAGE ?IP_USAGE ;
+    }
+    optional {
+      ?row  mydata:OP_USAGE ?OP_USAGE ;
+    }
+    optional {
+      ?row  mydata:AVG_USAGE ?AVG_USAGE ;
+    }
+    optional {
+      ?row  mydata:IS_NEC ?IS_NEC ;
+    }
+    optional {
+      ?row  mydata:SNOMED_CID ?SNOMED_CID ;
+    }
+    optional {
+      ?row  mydata:SNOMED_FSN ?SNOMED_FSN ;
+    }
+    optional {
+      ?row  mydata:IS_1-1MAP ?IS_1_1MAP ;
+    }
+    optional {
+      ?row  mydata:CORE_USAGE ?CORE_USAGE ;
+    }
+    optional {
+      ?row  mydata:IN_CORE ?IN_CORE .
+    }
+    BIND(uuid() AS ?myRowId)
+  }
+}'
+
+ontorefine.results <-
+  lapply(ontorefine.projects, function(current.project) {
+    assembled.statement <-
+      paste0(ontorefine.prefix, current.project, ontorefine.postfix)
+    cat(assembled.statement)
+    post.res <- POST(update.endpoint,
+                     body = list(update = assembled.statement),
+                     saved.authentication)
+    
+    print(post.res$times[['total']])
+  })
+
+###   ###   ###
+
 
 update.list <- list(
   "materialize UMLS CUIs" <- '
@@ -313,100 +391,8 @@ where {
         ?s ?p ?o
     }
 }
-')
-
-update.outer.result <-
-  lapply(update.list, function(current.update) {
-    cat(current.update)
-    post.res <- POST(update.endpoint,
-                     body = list(update = current.update),
-                     saved.authentication)
-    
-    print(post.res$times[['total']])
-  })
-
-ontorefine.prefix <- 'PREFIX mydata: <http://example.com/resource/>
-  PREFIX spif: <http://spinrdf.org/spif#>
-insert {
-  graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-    ?myRowId a <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ;
-    mydata:File ?File ;
-    mydata:ICD_CODE ?ICD_CODE ;
-    mydata:ICD_NAME ?ICD_NAME ;
-    mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
-    mydata:IP_USAGE ?IP_USAGE ;
-    mydata:OP_USAGE ?OP_USAGE ;
-    mydata:AVG_USAGE ?AVG_USAGE ;
-    mydata:IS_NEC ?IS_NEC ;
-    mydata:SNOMED_CID ?SNOMED_CID ;
-    mydata:SNOMED_FSN ?SNOMED_FSN ;
-    mydata:IS_1-1MAP ?IS_1_1MAP ;
-    mydata:CORE_USAGE ?CORE_USAGE ;
-    mydata:IN_CORE ?IN_CORE .
-  }
-} WHERE {
-  SERVICE <'
-
-ontorefine.postfix <- '> {
-    ?row a mydata:Row ;
-    mydata:File ?File ;
-    mydata:ICD_CODE ?ICD_CODE .
-    optional {
-      ?row mydata:ICD_NAME ?ICD_NAME ;
-    }
-    optional {
-      ?row mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
-    }
-    optional {
-      ?row  mydata:IP_USAGE ?IP_USAGE ;
-    }
-    optional {
-      ?row  mydata:OP_USAGE ?OP_USAGE ;
-    }
-    optional {
-      ?row  mydata:AVG_USAGE ?AVG_USAGE ;
-    }
-    optional {
-      ?row  mydata:IS_NEC ?IS_NEC ;
-    }
-    optional {
-      ?row  mydata:SNOMED_CID ?SNOMED_CID ;
-    }
-    optional {
-      ?row  mydata:SNOMED_FSN ?SNOMED_FSN ;
-    }
-    optional {
-      ?row  mydata:IS_1-1MAP ?IS_1_1MAP ;
-    }
-    optional {
-      ?row  mydata:CORE_USAGE ?CORE_USAGE ;
-    }
-    optional {
-      ?row  mydata:IN_CORE ?IN_CORE .
-    }
-    BIND(uuid() AS ?myRowId)
-  }
-}'
-
-ontorefine.projects <-
-  list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
-
-ontorefine.results <-
-  lapply(ontorefine.projects, function(current.project) {
-    assembled.statement <-
-      paste0(ontorefine.prefix, current.project, ontorefine.postfix)
-    cat(assembled.statement)
-    post.res <- POST(update.endpoint,
-                     body = list(update = assembled.statement),
-                     saved.authentication)
-    
-    print(post.res$times[['total']])
-  })
-
-
-update.list <-
-  list(
-    "NLM ICD9CM to SNOMED mapping" = 'PREFIX mydata: <http://example.com/resource/>
+',
+"NLM ICD9CM to SNOMED mapping" = 'PREFIX mydata: <http://example.com/resource/>
 insert data {
 graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
     mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
@@ -531,8 +517,31 @@ insert {
     graph ?g {
         ?s a owl:Class
     }
-}'
-  )
+}',
+"materializedMondoAxioms" = '
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+insert {
+        graph mydata:materializedMondoAxioms {
+    ?term ?op ?valSource
+    }
+}
+where {
+    graph obo:mondo.owl {
+        ?term rdfs:subClassOf* ?restr ;
+                             rdfs:label ?termlab .
+        ?restr a owl:Restriction ;
+               owl:onProperty ?op ;
+               owl:someValuesFrom ?valSource .
+        ?op rdfs:label ?opl .
+        ?valSource rdfs:label ?vsl .
+        filter(isuri( ?term ))
+    }
+}
+#limit 99'
+)
 
 update.outer.result <-
   lapply(update.list, function(current.update) {

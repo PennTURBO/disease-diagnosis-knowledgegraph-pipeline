@@ -1,0 +1,10 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+select 
+?p (count(distinct ?s) as ?count)
+where {
+    graph obo:mondo.owl {
+        ?s ?p ?o .
+    }
+}
+group by ?p
+order by desc(count(distinct ?s))
