@@ -1,0 +1,32 @@
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select 
+*
+#distinct ?g 
+#distinct ?p
+where {
+    graph obo:mondo.owl {
+        ?restr a owl:Restriction ;
+               owl:onProperty ?op ;
+               owl:someValuesFrom ?valSource .
+        ?op rdfs:label ?opl .
+        ?valSource rdfs:label ?vsl .
+        #        ?s ?p ?o
+    }
+}
+#limit 99
+#obo:mondo.owl
+#http://purl.bioontology.org/ontology/ICD10CM/
+#http://purl.bioontology.org/ontology/ICD9CM/
+#http://purl.bioontology.org/ontology/SNOMEDCT/
+#mydata:materializedCui
+#https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html
+#mydata:mondoOriginals
+#mydata:rewrites
+#mydata:undefinedRewrites
+#mydata:ICD10CM_siblings
+#mydata:ICD9CM_siblings
+#mydata:icd9range
+#mydata:definedIn
