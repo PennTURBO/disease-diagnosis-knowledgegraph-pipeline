@@ -1,10 +1,13 @@
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 select 
-?p (count(distinct ?s) as ?count)
+?p ?t (count(distinct ?s) as ?count)
 where {
     graph obo:mondo.owl {
         ?s ?p ?o .
+        optional {
+            ?p a ?t
+        }
     }
 }
-group by ?p
+group by ?p ?t
 order by desc(count(distinct ?s))
