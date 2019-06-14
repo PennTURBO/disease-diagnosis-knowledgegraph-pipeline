@@ -20,29 +20,20 @@ library(httr)
 # materialize SNOMEDCT icd10 text ammpings? might they just be the same as shared CUIs?
 
 
-# graphdb.address.port <- "http://turbo-prd-db01.pmacs.upenn.edu:7200"
-# # graphdb.address.port <- "http://localhost:7200"
-#
-# # locahost free
-# # selected.repo <- "disease_to_diagnosis"
-# selected.repo <- "disease_diagnosis_20190612"
-#
-# ontorefine.projects <-
-#   list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
 
 configurations <- list(
   "E5570" = list(
-    "graphdb.address.port" <-
+    "graphdb.address.port" =
       "http://localhost:7200",
-    "selected.repo" <- "disease_to_diagnosis",
-    "ontorefine.projects" <-
+    "selected.repo" = "disease_to_diagnosis",
+    "ontorefine.projects" =
       list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
   ),
   "turbo-prd-db01" = list(
-    "graphdb.address.port" <-
+    "graphdb.address.port" =
       "http://turbo-prd-db01.pmacs.upenn.edu:7200",
-    "selected.repo" <- "disease_diagnosis_20190612",
-    "ontorefine.projects" <-
+    "selected.repo" = "disease_diagnosis_20190612",
+    "ontorefine.projects" =
       list("1to1" = 'ontorefine:1908476393038', "1toMany" = 'ontorefine:1988267734735')
     
   )
@@ -150,7 +141,7 @@ ontorefine.results <-
 
 
 update.list <- list(
-  "materialize UMLS CUIs" <- '
+  "materialize UMLS CUIs" = '
 PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
 insert {
     graph <http://example.com/resource/materializedCui> {
@@ -225,7 +216,7 @@ where {
     }
 }
 ',
-"mondo dbxr literal", '
+"mondo dbxr literal" = '
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 # remove icd9 ranges, even if they are defined (?rewrite a ?t)
@@ -250,7 +241,7 @@ where {
     }
 }
 ',
-"isolate undefined mondo ?p rewrites",'
+"isolate undefined mondo ?p rewrites" = '
 insert {
     graph <http://example.com/resource/undefinedRewrites> {
         ?mondo ?p ?rewrite
@@ -265,7 +256,7 @@ where {
     }
 }
 ',
-"delete undefined mondo ?p rewrites from mondo",'
+"delete undefined mondo ?p rewrites from mondo" = '
 delete {
     graph <http://example.com/resource/rewrites> {
         ?mondo ?p ?rewrite
@@ -280,7 +271,7 @@ where {
     }
 }
 ',
-"isolate undefined rewrite ?p mondo",'
+"isolate undefined rewrite ?p mondo" = '
 insert {
     graph <http://example.com/resource/undefinedRewrites> {
         ?rewrite  ?p ?mondo
@@ -295,7 +286,7 @@ where {
     }
 }
 ',
-"delete undefined rewrite ?p mondo from mondo",'
+"delete undefined rewrite ?p mondo from mondo" = '
 delete {
     graph <http://example.com/resource/rewrites> {
         ?rewrite  ?p ?mondo
@@ -310,7 +301,7 @@ where {
     }
 }
 ',
-"isolate ?momdo ?p icd9 ranges",'
+"isolate ?momdo ?p icd9 ranges" = '
 insert {
     graph <http://example.com/resource/icd9range> {
         ?mondo ?p ?rewrite
@@ -323,7 +314,7 @@ insert {
     filter(contains(str( ?rewrite),"-"))
 }
 ',
-"delete ?momdo ?p icd9 ranges",'
+"delete ?momdo ?p icd9 ranges" = '
 delete {
     graph <http://example.com/resource/rewrites> {
         ?mondo ?p ?rewrite
@@ -333,7 +324,7 @@ delete {
         ?mondo ?p ?rewrite
     }
 }
-',"isolate ?icd9 ranges ?p momdo ",'
+',"isolate ?icd9 ranges ?p momdo " = '
 insert {
     graph <http://example.com/resource/icd9range> {
         ?rewrite ?p ?mondo
@@ -346,7 +337,7 @@ insert {
     filter(contains(str( ?rewrite),"-"))
 }
 ',
-"delete ?icd9 ranges ?p momdo ",'
+"delete ?icd9 ranges ?p momdo " = '
 delete {
     graph <http://example.com/resource/rewrites> {
         ?s ?p ?o
@@ -357,7 +348,7 @@ delete {
     }
 }
 ',
-"isolate mondo original statements",'
+"isolate mondo original statements" = '
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 insert {
@@ -378,7 +369,7 @@ where {
     }
 }
 ',
-"delete mondo original statements from mondo",'
+"delete mondo original statements from mondo" = '
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 delete {
@@ -433,7 +424,7 @@ where {
         ?s ?p ?boolean
     }
 }',
-"clear temp",'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
+"clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
 "materialize ICD9CM to snomed mappings" = 'PREFIX mydata: <http://example.com/resource/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 insert {
@@ -542,6 +533,446 @@ where {
 }
 #limit 99'
 )
+
+update.names <- names(update.list)
+
+update.outer.result <-
+  lapply(update.list, function(current.update) {
+    cat(current.update)
+    post.res <- POST(update.endpoint,
+                     body = list(update = current.update),
+                     saved.authentication)
+    
+    print(post.res$times[['total']])
+  })
+
+###
+
+update.list <- list(
+  "m-dbxr-icd9" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# unfiltered: Added 84927 statements. Update took 1m 48s, moments ago.
+# filter out has modification: inherited Added 71359 statements. Update took 17m 9s, moments ago.
+insert {
+    graph mydata:m-dbxr-i9 {
+        ?subIcd mydata:evidenceFor ?mondo
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?mondo  rdfs:subClassOf+
+                # <http://purl.obolibrary.org/obo/MONDO_0005275> .
+                <http://purl.obolibrary.org/obo/MONDO_0000001> .
+        ?mondoSub rdfs:subClassOf* ?mondo .
+    }
+    minus {
+        # start with has modifier inherited then add more
+        graph <http://example.com/resource/materializedMondoAxioms> {
+            ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+        }
+    }
+    graph <http://example.com/resource/rewrites> {
+        ?mondoSub <http://www.itmat.upenn.edu/biobank/mdbxr> ?icd .
+    }
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?icd a owl:Class .
+        ?subIcd rdfs:subClassOf* ?icd .
+    }
+}',
+"m-dbxr-icd10" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# unfiltered: Added 84927 statements. Update took 1m 48s, moments ago.
+# filter out has modification: inherited Added 71359 statements. Update took 17m 9s, moments ago.
+insert {
+    graph mydata:m-dbxr-i10 {
+        ?subIcd mydata:evidenceFor ?mondo
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+        ?mondoSub rdfs:subClassOf* ?mondo .
+    }
+    minus {
+        # start with has modifier inherited then add more
+        graph <http://example.com/resource/materializedMondoAxioms> {
+            ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+        }
+    }
+    graph <http://example.com/resource/rewrites> {
+        ?mondoSub <http://www.itmat.upenn.edu/biobank/mdbxr> ?icd .
+    }
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?icd a owl:Class .
+        ?subIcd rdfs:subClassOf* ?icd .
+    }
+}',
+"m-dbxr-snomed-shared_cui-i9" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-dbxr-snomed-shared_cui-i9 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub <http://www.itmat.upenn.edu/biobank/mdbxr> ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-eqClass-snomed-shared_cui-i9" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-eqClass-snomed-shared_cui-i9 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub owl:equivalentClass ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-exMatch-snomed-shared_cui-i9" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-exMatch-snomed-shared_cui-i9 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub skos:exactMatch ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-cMatch-snomed-shared_cui-i9" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-cMatch-snomed-shared_cui-i9 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub skos:closeMatch ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-dbxr-snomed-shared_cui-i10" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-dbxr-snomed-shared_cui-i10 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub <http://www.itmat.upenn.edu/biobank/mdbxr> ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-eqClass-snomed-shared_cui-i10" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-eqClass-snomed-shared_cui-i10 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub owl:equivalentClass ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-exMatch-snomed-shared_cui-i10" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-exMatch-snomed-shared_cui-i10 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub skos:exactMatch ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}',
+"m-cMatch-snomed-shared_cui-i10" = '
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+# theres a mechanism here for filtering mondo classes by axioms
+# but not for snomed yet
+# cancer http://purl.obolibrary.org/obo/MONDO_0004992 Added 3170 statements. Update took 1m 18s, moments ago.
+# lung disease <http://purl.obolibrary.org/obo/MONDO_0005275>
+insert {
+  graph mydata:m-cMatch-snomed-shared_cui-i10 {
+    ?subIcd mydata:evidenceFor ?mondo
+  }
+}
+where {
+  graph <http://purl.obolibrary.org/obo/mondo.owl> {
+    ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    ?mondoSub rdfs:subClassOf* ?mondo .
+  }
+  minus {
+    # start with has modifier inherited then add more
+    graph <http://example.com/resource/materializedMondoAxioms> {
+      ?mondoSub obo:RO_0002573 obo:MONDO_0021152
+    }
+  }
+  graph <http://example.com/resource/rewrites> {
+    ?mondoSub skos:closeMatch ?code .
+  }
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+    ?code a owl:Class .
+    ?subcode rdfs:subClassOf* ?code .
+  }
+  graph mydata:materializedCui {
+    ?subcode mydata:materializedCui ?materializedCui .
+    ?icd mydata:materializedCui ?materializedCui .
+  }
+  graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+    ?icd a owl:Class .
+    ?subIcd rdfs:subClassOf* ?icd .
+  }
+}')
+
+update.names <- names(update.list)
 
 update.outer.result <-
   lapply(update.list, function(current.update) {
