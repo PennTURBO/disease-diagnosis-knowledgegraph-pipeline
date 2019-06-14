@@ -9,26 +9,53 @@ library(httr)
 # icd10 from the ums2rdf pipeline into 	http://purl.bioontology.org/ontology/ICD10CM/
 # ontorefine:
 # https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
-# ICD9CM_SNOMED_MAP_1TO1_201812.txt -> ontorefine:1743351501645 on laptop
-# ICD9CM_SNOMED_MAP_1TOM_201812.txt -> ontorefine:2279568511296 on laptop
-
-
-# still to do
-# materialize SNOMEDCT icd10 relations... might they just be the same as shared CUIs?
+# ICD9CM_SNOMED_MAP_1TO1_201812.txt -> ontorefine:1743351501645 on laptop,
+#   ontorefine:1908476393038 on turbo-prd-db01
+# ICD9CM_SNOMED_MAP_1TOM_201812.txt -> ontorefine:2279568511296 on laptop,
+#   ontorefine:1988267734735  on turbo-prd-db01
 
 
 # maybe
 # materialize all of the paths and then flatten for Hayden
-# don't peruse syndromes or congenital conditions from SNOMEDCT
+# don't peruse syndromes or congenital conditions from mondo (ok, at least reporting) SNOMEDCT (no action)
+# cancer maps to lots of false positives?
 # apply over query labels, not the queries themselves?
+# materialize SNOMEDCT icd10 text ammpings? might they just be the same as shared CUIs?
 
 
-graphdb.address.port <- "http://turbo-prd-db01.pmacs.upenn.edu:7200"
-# graphdb.address.port <- "http://localhost:7200"
+# graphdb.address.port <- "http://turbo-prd-db01.pmacs.upenn.edu:7200"
+# # graphdb.address.port <- "http://localhost:7200"
+#
+# # locahost free
+# # selected.repo <- "disease_to_diagnosis"
+# selected.repo <- "disease_diagnosis_20190612"
+#
+# ontorefine.projects <-
+#   list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
 
-# locahost free
-# selected.repo <- "disease_to_diagnosis"
-selected.repo <- "disease_diagnosis_20190612"
+configurations <- list(
+  "E5570" = list(
+    "graphdb.address.port" <-
+      "http://localhost:7200",
+    "selected.repo" <- "disease_to_diagnosis",
+    "ontorefine.projects" <-
+      list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
+  ),
+  "turbo-prd-db01" = list(
+    "graphdb.address.port" <-
+      "http://turbo-prd-db01.pmacs.upenn.edu:7200",
+    "selected.repo" <- "disease_diagnosis_20190612",
+    "ontorefine.projects" <-
+      list("1to1" = 'ontorefine:1908476393038', "1toMany" = 'ontorefine:1988267734735')
+    
+  )
+)
+
+selected.configuration <- "E5570"
+selected.configuration <- configurations[[selected.configuration]]
+graphdb.address.port <- selected.configuration[[1]]
+selected.repo <- selected.configuration[[2]]
+ontorefine.projects <- selected.configuration[[3]]
 
 # sparql.prefixes <- ""
 
@@ -361,11 +388,11 @@ ontorefine.postfix <- '> {
   }
 }'
 
-ontorefie.projects <-
+ontorefine.projects <-
   list("1to1" = 'ontorefine:1743351501645', "1toMany" = 'ontorefine:2279568511296')
 
 ontorefine.results <-
-  lapply(ontorefie.projects, function(current.project) {
+  lapply(ontorefine.projects, function(current.project) {
     assembled.statement <-
       paste0(ontorefine.prefix, current.project, ontorefine.postfix)
     cat(assembled.statement)
