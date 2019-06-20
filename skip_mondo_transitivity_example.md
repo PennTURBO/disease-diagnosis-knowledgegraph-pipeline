@@ -127,7 +127,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX mydata: <http://example.com/resource/>
 insert {
-    graph mydata:ICD9TransitiveDiseaseInjurySubClasses {
+    graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
         ?sub rdfs:subClassOf ?s .
     }
 }
