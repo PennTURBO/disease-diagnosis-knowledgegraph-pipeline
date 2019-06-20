@@ -94,7 +94,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 insert {
-    graph mydata:filteredTransitiveSubClasses {
+    graph mydata:filteredMondoTransitiveSubClasses {
         ?mondoSub rdfs:subClassOf ?mondo .
     }
 } 
@@ -111,3 +111,26 @@ where {
 ```
 
 > Added 300278 statements. Update took 32m 52s, today at 07:08. 
+
+----
+
+```
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+insert {
+    graph mydata:ICD9TransitiveDiseaseInjurySubClasses {
+        ?sub rdfs:subClassOf ?s .
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        # + or * ?
+        ?s rdfs:subClassOf <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
+        ?sub rdfs:subClassOf* ?s .
+    }
+}
+```
+
+> Added 14869 statements. Update took 1.9s, moments ago. 
