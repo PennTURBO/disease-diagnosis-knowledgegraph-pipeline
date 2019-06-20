@@ -1,4 +1,5 @@
 ## Notes
+- repo `disease_diagnosis_20190617_add_mapsTo` on http://turbo-prd-db01:7200
 - Using `mydata:mapsTo` instead of `http://graphBuilder.org/mapsTo`
 - Using different graph names compared to repo `Hayden_diseaseToDiagnosis`
 - Like Hayden, not initially materializing transitively over MonDO subclasses OR testing for excludable rare/syndromic diseases 
