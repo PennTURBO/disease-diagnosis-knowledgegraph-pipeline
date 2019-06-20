@@ -2,7 +2,7 @@
 - repo `disease_diagnosis_20190617_add_mapsTo` on http://turbo-prd-db01:7200
 - Using `mydata:mapsTo` instead of `http://graphBuilder.org/mapsTo`
 - Using different graph names compared to repo `Hayden_diseaseToDiagnosis`
-- Like Hayden, not initially materializing transitively over MonDO subclasses OR testing for excludable rare/syndromic diseases 
+- As Hayden does for `Hayden_diseaseToDiagnosis`, I didn't initially materialize transitively over MonDO subclasses OR test for excludable rare/syndromic diseases 
 
 ## Next steps
 - Try with the other paths
@@ -10,7 +10,7 @@
 - Are SNOMED path results the same for all of the following predicates? 
     - oboInOwl:hasDbXref
 	- owl:equivalentClass
-	- skos:closeMatch?
+	- skos:closeMatch
 
 ```
 PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
