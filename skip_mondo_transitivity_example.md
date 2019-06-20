@@ -58,7 +58,7 @@ where {
 - Will have to add more filters later
 - Note that SNOMED filters would have to be written separately
     - SNOMED disease = http://purl.bioontology.org/ontology/SNOMEDCT/64572001
-    - for example 3 <http://purl.bioontology.org/ontology/SNOMEDCT/occurs_in> <http://purl.bioontology.org/ontology/SNOMEDCT/255399007> (Congenital)
+    - for example: <http://purl.bioontology.org/ontology/SNOMEDCT/occurs_in> <http://purl.bioontology.org/ontology/SNOMEDCT/255399007> (Congenital)
 
 ```
 PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
