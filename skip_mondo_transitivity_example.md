@@ -1,3 +1,8 @@
+Typical quad from `Hayden_diseaseToDiagnosis`:
+obo:MONDO_0001770 <http://graphBuilder.org/mapsTo> <http://purl.bioontology.org/ontology/ICD10CM/C25.4> <http://graphBuilder.org/mondoToIcdMappingsFullSemantics>
+
+Map to literals instead of entity URIs for more manageable visualizations?
+
 ## Notes
 - repo `disease_diagnosis_20190617_add_mapsTo` on http://turbo-prd-db01:7200
 - Using `mydata:mapsTo` instead of `http://graphBuilder.org/mapsTo`
