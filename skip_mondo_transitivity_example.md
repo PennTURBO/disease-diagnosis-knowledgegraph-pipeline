@@ -229,7 +229,7 @@ order by desc(count(?sub))
 | snomed:SUBSET_MEMBER                  | owl:DatatypeProperty | 1813640 | FALSE       |                       |
 | snomed:TYPE_ID                        | owl:DatatypeProperty | 158338  | FALSE       |                       |
 | umls:hasSTY                           | owl:ObjectProperty   | 79635   | maybe       |                       |
-| rdfs:subClassOf                       |                      | 160191  | maybe       |                       |
+| rdfs:subClassOf                       |                      | 160191  | **maybe**       |                       |
 | snomed:associated_finding_of          | owl:ObjectProperty   | 1684    | maybe       |                       |
 | snomed:associated_with                | owl:ObjectProperty   | 2736    | maybe       |                       |
 | snomed:cause_of                       | owl:ObjectProperty   | 3923    | maybe       |                       |
