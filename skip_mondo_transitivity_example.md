@@ -161,41 +161,5 @@ where {
 }
 ```
 
-> 
-
-    Unnamed
-
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-PREFIX mydata: <http://example.com/resource/>
-
-insert {
-
-    graph mydata:ICD10TransitiveSubClasses {
-
-        ?sub rdfs:subClassOf ?s .
-
-    }
-
-}
-
-where {
-
-    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-
-        # + or * ?
-
-        ?s rdfs:subClassOf+ owl:Thing .
-
-        ?sub rdfs:subClassOf* ?s .
-
-    }
-
-}
-
-> Added 116205 statements. Update took 16s, moments ago. 
+> Added 564084 statements. Update took 1m 18s, minutes ago
 
