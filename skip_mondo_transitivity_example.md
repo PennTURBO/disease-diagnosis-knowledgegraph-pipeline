@@ -80,3 +80,7 @@ where {
     }
 }
 ```
+
+> Added 228971 statements. Update took 48m 42s, yesterday at 22:18. 
+
+**Duh, we'll have to do the MonDO transitivity part for many/all routes... do that separately from even then inheritance of ICD codes?**
