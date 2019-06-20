@@ -55,3 +55,36 @@ where {
 ```
 
 > Added 96548 statements. Update took 2m 50s, minutes ago. 
+
+## Now materialize transitively and filter out rare disease
+
+- Will have to add more filters later
+- Note that SNOMED filters would have to be written separately
+
+```
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+insert {
+    graph mydata:m-eqClass-snomed-shared_cui-i9 {
+        ?mondo  mydata:mapsTo ?subIcd
+    }
+} 
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?mondoSub rdfs:subClassOf* ?mondo .
+    }
+    graph mydata:m-eqClass-snomed-shared_cui-i9 {
+        ?mondoSub  mydata:mapsTo ?subIcd
+    }
+    minus {
+        graph <http://example.com/resource/materializedMondoAxioms> {
+            ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
+        }
+    }
+}
+```
