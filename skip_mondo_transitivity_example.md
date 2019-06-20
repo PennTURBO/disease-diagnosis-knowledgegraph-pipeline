@@ -12,7 +12,6 @@ Map to literals instead of entity URIs for more manageable visualizations?
 ## Next steps
 - Try with the other paths
 - Add the MonDO transitivity and rare/syndomic filtering after the fact
-    - SNOMED disease = http://purl.bioontology.org/ontology/SNOMEDCT/64572001
 - Are SNOMED path results the same for all of the following predicates? 
     - oboInOwl:hasDbXref
 	- owl:equivalentClass
@@ -58,6 +57,8 @@ where {
 
 - Will have to add more filters later
 - Note that SNOMED filters would have to be written separately
+    - SNOMED disease = http://purl.bioontology.org/ontology/SNOMEDCT/64572001
+    - for example 3 <http://purl.bioontology.org/ontology/SNOMEDCT/occurs_in> <http://purl.bioontology.org/ontology/SNOMEDCT/255399007> (Congenital)
 
 ```
 PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
