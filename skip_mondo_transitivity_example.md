@@ -25,18 +25,10 @@ insert {
         ?mondo  mydata:mapsTo ?subIcd
     }
 } 
-#select *
 where {
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
-        #        ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0005275> .
         ?mondo  rdfs:subClassOf+ <http://purl.obolibrary.org/obo/MONDO_0000001> .
-        #        ?mondoSub rdfs:subClassOf* ?mondo .
     }
-    #    minus {
-    #        graph <http://example.com/resource/materializedMondoAxioms> {
-    #            ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
-    #        }
-    #    }
     graph <http://example.com/resource/rewrites> {
         ?mondo owl:equivalentClass ?code .
     } 
