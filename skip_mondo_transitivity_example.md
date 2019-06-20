@@ -254,4 +254,24 @@ order by desc(count(?sub))
 | snomed:occurs_in                      | owl:ObjectProperty   | 12065   | maybe       |                       |
 | snomed:temporally_related_to          | owl:ObjectProperty   | 25      | maybe       |                       |
 
+```
+PREFIX mydata: <http://example.com/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+select ?p ?o ?l (count(?sub) as ?count) 
+where {
+    graph mydata:SnomedDiseaseTransitiveSubClasses {
+        ?sub rdfs:subClassOf <http://purl.bioontology.org/ontology/SNOMEDCT/64572001> 
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+        ?sub ?p ?o .
+        ?p a owl:ObjectProperty .
+        ?o skos:prefLabel ?l .
+    }
+}
+group by ?p ?o ?l
+order by desc(count(?sub))
+```
 
+*1,000 of 23,454 in 4 seconds*
