@@ -1,6 +1,15 @@
+## Notes
 - Using `mydata:mapsTo` instead of `http://graphBuilder.org/mapsTo`
 - Using different graph names compared to repo `Hayden_diseaseToDiagnosis`
 - Like Hayden, not initially materializing transitively over MonDO subclasses OR testing for excludable rare/syndromic diseases 
+
+## Next steps
+- Try with the other paths
+- Add the MonDO transitivity and rare/syndomic filtering after the fact
+- Are SNOMED path results the same for all of the following predicates? 
+    - oboInOwl:hasDbXref
+	- owl:equivalentClass
+	- skos:closeMatch?
 
 ```
 PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
