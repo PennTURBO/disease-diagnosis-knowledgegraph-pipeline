@@ -12,6 +12,7 @@ Map to literals instead of entity URIs for more manageable visualizations?
 ## Next steps
 - Try with the other paths
 - Add the MonDO transitivity and rare/syndomic filtering after the fact
+    - SNOMED disease = http://purl.bioontology.org/ontology/SNOMEDCT/64572001
 - Are SNOMED path results the same for all of the following predicates? 
     - oboInOwl:hasDbXref
 	- owl:equivalentClass
@@ -162,4 +163,25 @@ where {
 ```
 
 > Added 564084 statements. Update took 1m 18s, minutes ago
+
+---
+
+```
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+insert {
+    graph mydata:SnomedDiseaseTransitiveSubClasses {
+        ?sub rdfs:subClassOf ?s .
+    }
+}
+where {
+    graph <https://bioportal.bioontology.org/ontologies/SNOMEDCT> {
+        # + or * ?
+        ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT/64572001> .
+        ?sub rdfs:subClassOf* ?s .
+    }
+}
+```
 
