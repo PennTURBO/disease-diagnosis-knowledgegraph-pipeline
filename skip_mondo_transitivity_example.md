@@ -68,7 +68,7 @@ insert {
 } 
 where {
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
-        ?mondoSub rdfs:subClassOf* ?mondo .
+        ?mondoSub rdfs:subClassOf+ ?mondo .
     }
     graph mydata:m-eqClass-snomed-shared_cui-i9 {
         ?mondoSub  mydata:mapsTo ?subIcd
