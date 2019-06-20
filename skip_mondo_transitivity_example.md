@@ -132,13 +132,13 @@ insert {
 where {
     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
         # + or * ?
-        ?s rdfs:subClassOf <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
+        ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
         ?sub rdfs:subClassOf* ?s .
     }
 }
 ```
 
-> Added 14869 statements. Update took 1.9s, moments ago. 
+> Added 81980 statements. Update took 14s, moments ago. 
 
 ---
 
@@ -155,11 +155,47 @@ insert {
 where {
     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
         # + or * ?
-        ?s rdfs:subClassOf owl:Thing .
+        ?s rdfs:subClassOf+ owl:Thing .
         ?sub rdfs:subClassOf* ?s .
     }
 }
 ```
 
-> Added 22406 statements. Update took 2.9s, moments ago. 
+> 
+
+    Unnamed
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+PREFIX mydata: <http://example.com/resource/>
+
+insert {
+
+    graph mydata:ICD10TransitiveSubClasses {
+
+        ?sub rdfs:subClassOf ?s .
+
+    }
+
+}
+
+where {
+
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+
+        # + or * ?
+
+        ?s rdfs:subClassOf+ owl:Thing .
+
+        ?sub rdfs:subClassOf* ?s .
+
+    }
+
+}
+
+> Added 116205 statements. Update took 16s, moments ago. 
 
