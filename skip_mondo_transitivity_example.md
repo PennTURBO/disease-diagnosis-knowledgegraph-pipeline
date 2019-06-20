@@ -48,7 +48,7 @@ where {
 
 > Added 96548 statements. Update took 2m 50s, minutes ago. 
 
-## Now materialize transitively and filter out rare disease
+## Now materialize transitively and filter out inherited diseases
 
 - Will have to add more filters later
 - Note that SNOMED filters would have to be written separately
@@ -84,3 +84,28 @@ where {
 > Added 228971 statements. Update took 48m 42s, yesterday at 22:18. 
 
 **Duh, we'll have to do the MonDO transitivity part for many/all routes... do that separately from even then inheritance of ICD codes?**
+
+```
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+insert {
+    graph mydata:filteredTransitiveSubClasses {
+        ?mondoSub rdfs:subClassOf ?mondo .
+    }
+} 
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?mondoSub rdfs:subClassOf+ ?mondo .
+    }
+    minus {
+        graph <http://example.com/resource/materializedMondoAxioms> {
+            ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
+        }
+    }
+}
+```
