@@ -1,0 +1,12 @@
+default:
+  placeholder: 0
+
+pennturbo_lightsail_remote:
+  graphdb.address.port: 'http://localhost:7200'
+  selected.repo: 'disease_diagnosis_dev'
+  api.user: 'gdbuser'
+  # works with empty string if graphdb authentication has been disabled in the selected.repo
+  api.pass: 'gdbpass'
+
+bp_api:
+  api_key: ''
