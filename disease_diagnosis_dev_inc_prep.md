@@ -1,4 +1,6 @@
-## Converting UMLS content into RDF
+## Disease Diagnosis Pipeline
+
+### Converting UMLS content into RDF
 
 **Some** UMLS sources/components are already available as RDF files at the NCBO BioPortal. Others, like SNOMED, are not. This document describes how to convert those components into RDF on a remote Linux server. Note that the UMLS has an `AA` release in May of each year and an `AB` release in November. Some sources may be released more frequently (like RxNorm) and may have their own interfaces (like RxNav for RxNorm) that may be so convenient that they may be preferable over RDF in some cases.
 
@@ -144,8 +146,107 @@ Then
 
 - make sure the output directory exists
     - and check if you might overwrite a file
--  `cd` into the directory that contains the `umls2rdf` script and/or run it with the full path
+-  `cd` into the directory that contains the `umls2rdf` script and/or run it with the pull path
 
 ```BASH
 $ ./umls2rdf.py
 ```
+Copy the resulting Turtle files into the `graphdb-import` folder on the GraphDB server where they disease to diagnosis repository is going to be constructed.
+
+One good place to store files like these, and move them onto another location, is Amazon S3.
+
+Also required in the `graphdb-import` folder: `www_nlm_nih_gov_research_umls_mapping_projects_icd9cm_to_snomedct.ttl`, or some equivalent files that contains a direct mapping of the two csv files in the zip archive downloadable from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html
+
+Next, run [https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R](https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R)
+
+That R script is extensively commented.
+
+----
+
+## Orientation to the named graphs
+
+### MonDO
+
+#### Predicate usage
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select
+?p ?l (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s ?p ?o .
+        optional {
+            ?p rdfs:label ?l
+        }
+    }
+}
+group by ?p ?l
+order by desc(count(distinct ?s))
+```
+
+**p**|**l**|**count**
+:-----:|:-----:|-----:
+rdf:type| |403772
+owl:annotatedProperty| |263471
+owl:annotatedSource| |263471
+owl:annotatedTarget| |263471
+oboInOwl:source| |148839
+oboInOwl:hasDbXref|database\_cross\_reference|136711
+owl:equivalentClass| |65043
+rdfs:label| |23556
+oboInOwl:id| |23535
+owl:onProperty| |22425
+owl:someValuesFrom| |22425
+rdfs:subClassOf| |22027
+skos:exactMatch| |21577
+oboInOwl:hasExactSynonym|has\_exact\_synonym|17642
+obo:IAO\_0000115|definition|15442
+rdf:first| |15358
+rdf:rest| |15358
+oboInOwl:hasRelatedSynonym|has\_related\_synonym|11375
+oboInOwl:inSubset|in\_subset|10945
+owl:intersectionOf| |7452
+skos:closeMatch| |7110
+rdfs:seeAlso|seeAlso|3042
+owl:deprecated| |1781
+obo:IAO\_0100001|term replaced by|1554
+rdfs:comment| |996
+oboInOwl:hasSynonymType|has\_synonym\_type|860
+mondo:excluded\_subClassOf|excluded subClassOf|776
+oboInOwl:hasNarrowSynonym|has\_narrow\_synonym|290
+oboInOwl:hasBroadSynonym|has\_broad\_synonym|262
+oboInOwl:consider|consider|119
+obo:IAO\_0000231| |113
+oboInOwl:hasAlternativeId|has\_alternative\_id|111
+owl:disjointWith| |68
+dc:date| |55
+dc:creator| |54
+rdfs:subPropertyOf| |34
+oboInOwl:shorthand|shorthand|17
+oboInOwl:created\_by| |16
+owl:unionOf| |11
+skos:broadMatch| |11
+skos:narrowMatch| |10
+mondo:excluded\_synonym| |7
+owl:propertyChainAxiom| |7
+oboInOwl:is\_metadata\_tag| |4
+oboInOwl:notes| |3
+oboInOwl:is\_class\_level| |2
+oboInOwl:hasOBOFormatVersion|has\_obo\_format\_version|1
+mondo:may\_be\_merged\_into|may\_be\_merged\_into|1
+obo:RO\_0002161|never in taxon|1
+mondo:pathogenesis| |1
+mondo:related| |1
+dc:title| |1
+terms:description| |1
+terms:license| |1
+terms:source| |1
+oboInOwl:creation\_date| |1
+oboInOwl:modified\_by| |1
+oboInOwl:severity| |1
+owl:imports| |1
+owl:versionIRI| |1
+foaf:homepage| |1
+
+----
