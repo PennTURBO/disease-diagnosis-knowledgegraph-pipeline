@@ -186,7 +186,7 @@ order by desc(count(distinct ?s)) ?p
 ```
 
 **p**|**l**|**count**
-:-----:|:-----:|:-----:
+:-----:|:-----:|-----:
 rdf:type| |403772
 owl:annotatedProperty| |263471
 owl:annotatedSource| |263471
