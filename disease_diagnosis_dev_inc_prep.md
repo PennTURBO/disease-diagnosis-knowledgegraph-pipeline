@@ -458,4 +458,317 @@ order by desc(count(distinct ?s))
 owl:Class|owl:Class|true|64721
 owl:Class|owl:Class|false|7334
 
-----
+## Scripted Actions
+
+###  Materialize CUIs
+
+- later... check if CUIs asserted by MonDO are actually claimed by any UMLS->BioPortal terms?
+- see source predicate, destination graph, destination predicate and destination subject template below
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+insert {
+    graph <http://example.com/resource/materializedCui> {
+        ?c a  <http://example.com/resource/materializedCui> .
+        ?s <http://example.com/resource/materializedCui> ?c
+    }
+} where {
+    ?s umls:cui ?o .
+    bind(uri(concat("http://example.com/cui/", ?o)) as ?c)
+}
+```
+
+> Added 939750 statements. Update took 30s, minutes ago.
+
+### Rewrite subjects of "reverse" MonDO assertions
+
+"Reverse" means a MonDO term is the object. "Rewriting" means aligning the URI structure with the ICD and SNOMED URIs used by BioPortal, and our CUI materializations.
+
+This doesn't guarantee that the subject term is actually defined by the ICDs or SNOMED, or that it is a valid CUI. ICD9 ranges may need to be removed or isolated at a later point.
+
+_In previous disease/diagnosis repos, forward and reverse rewrites kept MonDO's native orientation and were put in a single named graph,_ `<http://example.com/resource/rewrites>` 
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# remove icd9 ranges LATER?, even if they are defined ?rewrite a ?t
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        values (?mondoPattern ?rewritePattern) {
+            ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?external  ?p ?mondo .
+        filter(strstarts(str(?external),?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+        #        ?rewrite a ?t
+    }
+}
+```
+
+> Added 19609 statements. Update took 5s, minutes ago.
+
+### Rewrite subjects of "forward" MonDO assertions
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# remove icd9 ranges LATER?, even if they are defined ?rewrite a ?t
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        values (?mondoPattern ?rewritePattern) {
+            ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?mondo ?p ?external .
+        filter(strstarts(str(?external),?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+        #        ?rewrite a ?t
+    }
+}
+```
+
+> Added 50572 statements. Update took 8.3s, minutes ago.
+
+### Materialize MonDO database cross references 
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# remove icd9 ranges, even if they are defined (?rewrite a ?t)
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo mydata:mdbxr ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values (?mondoPattern ?rewritePattern) {
+            ("UMLS:" "http://example.com/cui/")
+            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("ICD10:" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("ICD9:" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?mondo <http://www.geneontology.org/formats/oboInOwl#hasDbXref> ?external .
+        filter(strstarts(?external,?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+        #        ?rewrite a ?t
+    }
+}
+```
+
+> Added 43154 statements. Update took 6.5s, moments ago.
+
+### Isolate undefined rewrites
+
+```SPARQL
+insert {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?mondo ?p ?rewrite
+            }
+        } 
+        union {
+            {
+                graph <http://example.com/resource/rewrites_MonDO_subject> {
+                    ?mondo ?p ?rewrite
+                }
+            }  
+        }
+    }
+    minus {
+        ?rewrite a ?t
+    }
+}
+```
+
+### Delete undefined reverse rewrites
+
+```SPARQL
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+```
+
+> Removed 9328 statements. Update took 0.6s, minutes ago.
+
+### Delete undefined forward rewrites
+
+```SPARQL
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+```
+
+> Removed 58530 statements. Update took 1.2s, moments ago.
+
+### Isolate ICD9 ranges
+
+```SPARQL
+insert {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?mondo ?p ?rewrite
+            }
+        } 
+        union {
+            {
+                graph <http://example.com/resource/rewrites_MonDO_subject> {
+                    ?mondo ?p ?rewrite
+                }
+            }  
+        }
+    }
+    filter(strstarts(str( ?rewrite ),"http://purl.bioontology.org/ontology/ICD9CM/"))
+    filter(contains(str( ?rewrite),"-"))
+}
+```
+
+> Added 31 statements. Update took 0.4s, minutes ago.
+
+### Delete forward ICD9 ranges
+
+```SPARQL
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+```
+_Deleted all 31 of the isolated triples. Timing lost._
+
+
+
+### Delete reverse ICD9 ranges
+
+```SPARQL
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+```
+
+_Deleted 0 of the isolated triples. Timing lost._
+
+### Isolate re-writable external-link statements from MonDO
+
+This leaves in place all `subClassOf` statements, and any `equivalentClass` statements that take a restriction, or other blank node as their object. 
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+insert {
+    graph <http://example.com/resource/mondoOriginals> {
+        ?s ?p ?o
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        ?s ?p ?o
+        filter(isuri(?o))
+    }
+}
+```
+
+> Added 167354 statements. Update took 3.9s, minutes ago.
+
+### Delete re-writable external-link statements from _MonDO named graph_
+
+They're still available in the isolation graph above (unless a decision is made to clear it.)
+
+```SPARQL
+PREFIX mydata: <http://example.com/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+delete {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s ?p ?o
+    }
+}
+where {
+    graph <http://example.com/resource/mondoOriginals> {
+        ?s ?p ?o
+    }
+}
+```
+
+> Removed 167354 statements. Update took 3.1s, moments ago.
