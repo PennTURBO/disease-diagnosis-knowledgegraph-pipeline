@@ -278,4 +278,66 @@ owl:imports| |1
 owl:versionIRI| |1
 foaf:homepage| |1
 
+### Predicate usage on `owl:Axiom`s
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select
+?p ?l (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s a owl:Axiom ;
+           ?p ?o .
+        optional {
+            ?p rdfs:label ?l
+        }
+    }
+}
+group by ?p ?l
+order by desc(count(distinct ?s)) ?p
+```
+
+**p**|**l**|**count**
+:-----|:-----|-----:
+rdf:type| |263471
+owl:annotatedProperty| |263471
+owl:annotatedSource| |263471
+owl:annotatedTarget| |263471
+oboInOwl:source| |148839
+oboInOwl:hasDbXref|database\_cross\_reference|114619
+oboInOwl:hasSynonymType|has\_synonym\_type|860
+rdfs:comment| |11
+oboInOwl:notes| |3
+obo:IAO\_0000115|definition|1
+oboInOwl:hasExactSynonym|has\_exact\_synonym|1
+oboInOwl:modified\_by| |1
+oboInOwl:severity| |1
+
+### Predicate usage on `owl:Restriction`s
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select
+?p ?l (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s a owl:Restriction ;
+           ?p ?o .
+        optional {
+            ?p rdfs:label ?l
+        }
+    }
+}
+group by ?p ?l
+order by desc(count(distinct ?s)) ?p
+```
+
+**p**|**l**|**count**
+:-----|:-----|-----:
+rdf:type| |22425
+owl:onProperty| |22425
+owl:someValuesFrom| |22425
+
 ----
