@@ -182,11 +182,11 @@ where {
     }
 }
 group by ?p ?l
-order by desc(count(distinct ?s))
+order by desc(count(distinct ?s)) ?p
 ```
 
 **p**|**l**|**count**
-:-----:|:-----:|-----:
+:-----:|:-----:|:-----:
 rdf:type| |403772
 owl:annotatedProperty| |263471
 owl:annotatedSource| |263471
@@ -233,9 +233,8 @@ owl:propertyChainAxiom| |7
 oboInOwl:is\_metadata\_tag| |4
 oboInOwl:notes| |3
 oboInOwl:is\_class\_level| |2
-oboInOwl:hasOBOFormatVersion|has\_obo\_format\_version|1
-mondo:may\_be\_merged\_into|may\_be\_merged\_into|1
 obo:RO\_0002161|never in taxon|1
+mondo:may\_be\_merged\_into|may\_be\_merged\_into|1
 mondo:pathogenesis| |1
 mondo:related| |1
 dc:title| |1
@@ -243,6 +242,7 @@ terms:description| |1
 terms:license| |1
 terms:source| |1
 oboInOwl:creation\_date| |1
+oboInOwl:hasOBOFormatVersion|has\_obo\_format\_version|1
 oboInOwl:modified\_by| |1
 oboInOwl:severity| |1
 owl:imports| |1
