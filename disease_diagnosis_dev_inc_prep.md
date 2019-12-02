@@ -340,4 +340,122 @@ rdf:type| |22425
 owl:onProperty| |22425
 owl:someValuesFrom| |22425
 
+### Predicate usage on `owl:Class`es
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select
+?p ?l (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s a owl:Class ;
+           ?p ?o .
+        optional {
+            ?p rdfs:label ?l
+        }
+    }
+}
+group by ?p ?l
+order by desc(count(distinct ?s)) ?p
+```
+
+**p**|**l**|**count**
+:-----|:-----|-----:
+rdf:type| |117778
+owl:equivalentClass| |65043
+oboInOwl:id| |23506
+rdfs:label| |23506
+oboInOwl:hasDbXref|database\_cross\_reference|22075
+rdfs:subClassOf| |21951
+skos:exactMatch| |21577
+oboInOwl:hasExactSynonym|has\_exact\_synonym|17641
+obo:IAO\_0000115|definition|15441
+oboInOwl:hasRelatedSynonym|has\_related\_synonym|11375
+oboInOwl:inSubset|in\_subset|10945
+owl:intersectionOf| |7452
+skos:closeMatch| |7110
+rdfs:seeAlso|seeAlso|3042
+owl:deprecated| |1781
+obo:IAO\_0100001|term replaced by|1554
+rdfs:comment| |957
+mondo:excluded\_subClassOf|excluded subClassOf|776
+oboInOwl:hasNarrowSynonym|has\_narrow\_synonym|290
+oboInOwl:hasBroadSynonym|has\_broad\_synonym|262
+oboInOwl:consider|consider|119
+obo:IAO\_0000231| |113
+oboInOwl:hasAlternativeId|has\_alternative\_id|111
+owl:disjointWith| |68
+dc:date| |55
+dc:creator| |54
+oboInOwl:created\_by| |16
+owl:unionOf| |11
+skos:broadMatch| |11
+skos:narrowMatch| |10
+mondo:excluded\_synonym| |7
+obo:RO\_0002161|never in taxon|1
+mondo:may\_be\_merged\_into|may\_be\_merged\_into|1
+mondo:pathogenesis| |1
+mondo:related| |1
+oboInOwl:creation\_date| |1
+
+
+### subClassOf patterns
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select
+?st ?ot ?isuri_o (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s rdfs:subClassOf ?o .
+        optional {
+            ?s a ?st .
+        }
+        optional {
+            ?o a ?ot .
+        }
+    }
+    bind(isuri(?o) as ?isuri_o)
+}
+group by ?st ?ot ?isuri_o
+order by desc(count(distinct ?s))
+```
+
+**st**|**ot**|**isuri\_o**|**count**
+:-----|:-----|:-----|-----:
+owl:Class|owl:Class|true|21857
+owl:Class|owl:Restriction|false|7929
+owl:Class| |true|102
+. |owl:Class|true|76
+
+### equivalentClass patterns
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+select
+?st ?ot ?isuri_o (count(distinct ?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s owl:equivalentClass ?o .
+        optional {
+            ?s a ?st .
+        }
+        optional {
+            ?o a ?ot .
+        }
+    }
+    bind(isuri(?o) as ?isuri_o)
+}
+group by ?st ?ot ?isuri_o
+order by desc(count(distinct ?s))
+```
+
+**st**|**ot**|**isuri\_o**|**count**
+:-----|:-----|:-----|-----:
+owl:Class|owl:Class|true|64721
+owl:Class|owl:Class|false|7334
+
 ----
