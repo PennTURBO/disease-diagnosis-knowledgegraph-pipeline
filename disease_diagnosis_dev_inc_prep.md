@@ -167,6 +167,35 @@ That R script is extensively commented.
 
 ### MonDO
 
+#### Class usage
+
+```SPARQL
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+select
+?o ?l (count(?s) as ?count)
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s rdf:type ?o .
+        optional {
+            ?o rdfs:label ?l
+        }
+    }
+}
+group by ?o ?l
+order by desc(count(distinct ?s)) ?o
+```
+
+**o**|**l**|**count**
+:-----|:-----|-----:
+owl:Axiom| |263471
+owl:Class| |117778
+owl:Restriction| |22425
+owl:AnnotationProperty| |70
+owl:ObjectProperty| |27
+owl:Ontology| |1
+owl:TransitiveProperty| |1
+
 #### Predicate usage
 
 ```SPARQL
@@ -182,7 +211,7 @@ where {
     }
 }
 group by ?p ?l
-order by desc(count(distinct ?s)) ?p
+order by desc(count(distinct ?s))
 ```
 
 **p**|**l**|**count**
@@ -233,8 +262,9 @@ owl:propertyChainAxiom| |7
 oboInOwl:is\_metadata\_tag| |4
 oboInOwl:notes| |3
 oboInOwl:is\_class\_level| |2
-obo:RO\_0002161|never in taxon|1
+oboInOwl:hasOBOFormatVersion|has\_obo\_format\_version|1
 mondo:may\_be\_merged\_into|may\_be\_merged\_into|1
+obo:RO\_0002161|never in taxon|1
 mondo:pathogenesis| |1
 mondo:related| |1
 dc:title| |1
@@ -242,7 +272,6 @@ terms:description| |1
 terms:license| |1
 terms:source| |1
 oboInOwl:creation\_date| |1
-oboInOwl:hasOBOFormatVersion|has\_obo\_format\_version|1
 oboInOwl:modified\_by| |1
 oboInOwl:severity| |1
 owl:imports| |1
