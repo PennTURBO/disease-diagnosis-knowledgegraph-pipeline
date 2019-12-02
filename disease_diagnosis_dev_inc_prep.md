@@ -125,4 +125,27 @@ Then:
 
 Now the selected UMLS sources are available in the MySQL database. So use [NCBO's umls2rdf](https://github.com/ncbo/umls2rdf) to dump selected MySQL content to RDF files.
 
-Edit the database connection in `conf.py` and the source choices in `umls.conf`. I have had difficulty exporting some sources (like `MTHSPL`) despite multiple different attempts and request for help from NCBO and stackoverflow. One also needs to indicate whether the IRIs for UMLS terms should based on their native codes, or on the UMLS assigned CUIs. CUIs are a better choice for linking to other UMLS terms, but codes may be a better choice for connecting to OMOP concepts. Some sources, however, do not have native codes.
+Edit the source choices in `umls.conf`, copying from `conf_sample.py` if necessary,  and the database connection in `conf.py`.  I have had difficulty exporting some sources (like `MTHSPL`) despite multiple different attempts and request for help from NCBO and stackoverflow. One also needs to indicate whether the IRIs for UMLS terms should based on their native codes, or on the UMLS assigned CUIs. CUIs are a better choice for linking to other UMLS terms, but codes may be a better choice for connecting to OMOP concepts. Some sources, however, do not have native codes.
+
+Then 
+- make sure that the permissions on `umls2rdf.py` allow it to be executed by the current user
+- make sure python 2 is installed
+	- you may need to change the first line of  `umls2rdf` so that it points to the python 2 binary, like `#! /usr/bin/env python2.7`, instead of `#! /usr/bin/env python`
+- make sure that the required python libraries have been loaded. Some of them may have system dependencies.
+    - MySQLdb
+    - urllib
+- these libraries are imported, too, but should be available as part of the standard library
+   - codecs
+    - collections
+    - os
+    - pdb
+    - string.Template
+    - sys
+
+- make sure the output directory exists
+    - and check if you might overwrite a file
+-  `cd` into the directory that contains the `umls2rdf` script and/or run it with the pull path
+
+```BASH
+$ ./umls2rdf.py
+```
