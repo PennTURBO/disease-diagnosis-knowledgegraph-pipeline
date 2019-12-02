@@ -144,7 +144,7 @@ Then
 
 - make sure the output directory exists
     - and check if you might overwrite a file
--  `cd` into the directory that contains the `umls2rdf` script and/or run it with the pull path
+-  `cd` into the directory that contains the `umls2rdf` script and/or run it with the full path
 
 ```BASH
 $ ./umls2rdf.py
