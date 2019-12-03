@@ -772,3 +772,45 @@ where {
 ```
 
 > Removed 167354 statements. Update took 3.1s, moments ago.
+
+### ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
+
+(Ontorefine instantiation of two CSV files from [https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html))
+
+_Based on input from Anurag Verma, we are not using the General Equivalence Mappings from_ [https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage](https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage)
+
+```SPARQL
+select 
+?p (count(?s) as ?count)
+where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s ?p ?o .
+    }
+}
+group by ?p 
+order by desc(count(?s))
+```
+
+> Showing results from 1 to 15 of 15. Query took 1.3s, minutes ago.
+
+**p**|**count**
+:-----|-----:
+mydata:AVG\_USAGE|46645
+mydata:CORE\_USAGE|46645
+mydata:File|46645
+mydata:ICD\_CODE|46645
+mydata:ICD\_NAME|46645
+mydata:IN\_CORE|46645
+mydata:IP\_USAGE|46645
+mydata:IS\_1-1MAP|46645
+mydata:IS\_CURRENT\_ICD|46645
+mydata:IS\_NEC|46645
+mydata:OP\_USAGE|46645
+mydata:SNOMED\_CID|46645
+mydata:SNOMED\_FSN|46645
+rdf:type|46645
+https://www.nlm.nih.gov/research/umls/mapping\_projects/icd9cm\_to\_snomedct.html|45598
+
+_Why is the mapping predicate used 45598 times, but the others are all only used 46645 times?_
+
+_Note that the mapping predicate and graph name have been written with a trailing slash in some places and without in others. Standardize to WITHOUT_
