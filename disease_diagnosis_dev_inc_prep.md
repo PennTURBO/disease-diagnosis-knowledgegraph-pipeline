@@ -1462,4 +1462,64 @@ where {
 }
 ```
 
-> Added 1044847 statements. Update took 1m 31s, minutes ago
+> Added 1044847 statements. Update took 1m 31s, minutes ago.
+
+## Queries possible with no additional materialization
+
+### MonDO's direct paths to ICD10 codes
+
+In this case the _detailed_ paths would be the Cartesian product of the two `?rewriteGraph`s (which capture the orientation of MonDO's assertion) and the  `?assertedPredicate`s, which appear to be limited to two
+
+1. `mydata:mdbxr`
+1. `owl:equivalentClass`
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+select 
+distinct ?m ?rewriteGraph ?assertedPredicate ?i10code
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?i10
+    }
+    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
+        ?i10 rdfs:subClassOf ?anythingIcd10 .
+    }
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?i10 skos:notation ?i10code
+    }
+}
+```
+
+Timing: The results from this query (raw or **pre-distinct-ified**) can be **downloaded from AWS** to Penn in roughly 5 seconds.
+
+### MonDO's direct paths to ICD9 codes
+
+All of the remarks about the ICD10 mapping above hold true here, too.
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+select 
+distinct 
+?m ?rewriteGraph ?assertedPredicate ?i10code
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?i9
+    }
+    graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
+        ?i9 rdfs:subClassOf ?anythingIcd9 .
+    }
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?i9 skos:notation ?i9code
+    }
+}
+```
