@@ -3,26 +3,23 @@ library(config)
 library(httr)
 library(jsonlite)
 
-# debug.flag <- FALSE
-# delete.isolated.flag <- FALSE
+### revision log
+# switched to yaml config
+# refactored monitor.named.graphs into a function
 
 # SNOMEDCT or SNOMEDCT_US?
 # UMLS uses "SNOMEDCT_US" as their source abbrevation, adn that's what umls2rdf URIs use
 
-# # bioportal URIs are all versioned, so put them in yaml
-# ICD9CM.uri
-# ICD10CM.uri
-# umls.semantic.types.uri
+# apply SPARQL updates over labels, not the queries themselves? (DONE?)
 
-#
+# continue re-factoring SPARQL prefixes
 
+###
 
 # could have used: jsonlite? rjsonio? rjson?
 # slight differences in the returned structure
 # need to match with monitoring/expectation code
 
-# switched to yaml config
-# refactored monitor.named.graphs into a function
 # includes example of pure SPARQL::SPARQL update with authentication
 
 # what's an example of scripts that do use yaml and named graph monitoring function?
@@ -41,7 +38,6 @@ library(jsonlite)
 # filter out rare diseases, syndromes or congenital conditions from mondo
 # haven't put SNOMEDCT filtering into production yet
 # cancer maps to lots of false positives?
-# apply SPARQL updates over labels, not the queries themselves? (DONE?)
 # materialize SNOMEDCT's icd10 text mappings? they might just be the same as shared CUIs?
 
 ###
@@ -254,9 +250,9 @@ monitor.named.graphs <- function() {
     # SHOULD THESE BE LEFT AS GLOBALS OR BE SWITCHED TO FUNCTION PARAMETERS?
     print(paste0(Sys.time(),
                  ": '",
-                 post.status,
+                 last.post.status,
                  "' submitted at ",
-                 post.time))
+                 last.post.time))
     # print(paste0("Expecting graphs ", expectation, collapse = " ; "))
     # print(paste0("Current graphs ", context.report, collapse = " ; "))
     
@@ -323,23 +319,19 @@ monitor.named.graphs <- function() {
 
 # CLEAR REPO
 
-post.time <- Sys.time()
+last.post.time <- Sys.time()
 
 # post.res <- POST(update.endpoint,
 #                  body = list(update = "clear all"),
 #                  saved.authentication)
 #
 # # empty for sparql statement
-# post.status <- rawToChar(post.res$content)
+# last.post.status <- rawToChar(post.res$content)
 
 
-# or just do it as a sparql update... some numerical trick for the encryption type?
+# or just do it as a sparql update
 
-# Warning message:
-#   In testCurlOptionsInFormParameters(.params) :
-#   Found possible curl options in form parameters: userpwd, httpauth
-
-post.status <- update.statement <- "clear all"
+last.post.status <- update.statement <- "clear all"
 
 sparql.result <-
   SPARQL(
@@ -375,17 +367,21 @@ post.res <- POST(
   saved.authentication
 )
 
-post.status <- rawToChar(post.res$content)
-post.time <- Sys.time()
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
 
 ### ICD9CM
 
-update.body <- '{
+update.body <- paste0(
+  '{
   "type":"url",
   "format":"text/turtle",
   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-  "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
+  "data": "',
+  ICD9CM.uri,
+  '"
 }'
+)
 
 post.res <- POST(
   url.post.endpoint,
@@ -395,18 +391,21 @@ post.res <- POST(
   saved.authentication
 )
 
-post.status <- rawToChar(post.res$content)
-post.time <- Sys.time()
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
 
 ### ICD10CM
 
-
-update.body <- '{
+update.body <- paste0(
+  '{
   "type":"url",
   "format":"text/turtle",
   "context": "http://purl.bioontology.org/ontology/ICD10CM/",
-  "data": "http://data.bioontology.org/ontologies/ICD10CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
+  "data": "',
+  ICD10CM.uri,
+  '"
 }'
+)
 
 post.res <- POST(
   url.post.endpoint,
@@ -416,8 +415,8 @@ post.res <- POST(
   saved.authentication
 )
 
-post.status <- rawToChar(post.res$content)
-post.time <- Sys.time()
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
 
 
 ### semantic types
@@ -431,12 +430,17 @@ post.time <- Sys.time()
 # https://www.nlm.nih.gov/research/umls/META3_current_semantic_types.html ?
 
 
-update.body <- '{
+update.body <- paste0(
+  '{
   "type":"url",
   "format":"text/turtle",
   "context": "http://purl.bioontology.org/ontology/STY/",
-  "data": "http://data.bioontology.org/ontologies/STY/submissions/14/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
+  "data": "',
+  umls.semantic.types.uri,
+  '"
 }'
+)
+
 
 post.res <- POST(
   url.post.endpoint,
@@ -447,8 +451,8 @@ post.res <- POST(
 )
 
 
-post.status <- rawToChar(post.res$content)
-post.time <- Sys.time()
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
 
 ### icd9<->snomed mappings from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html,
 # direct-map instantiated with OntoRefine, and saved to turtle file
@@ -462,10 +466,6 @@ update.body <- paste0(
   "importSettings": { "context": "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html" }
 }'
 )
-
-# update.body
-#
-# filesystem.post.endpoint
 
 post.res <- POST(
   filesystem.post.endpoint,
@@ -496,8 +496,8 @@ post.res <- POST(
   saved.authentication
 )
 
-status.ph <- rawToChar(post.res$content)
-print(status.ph)
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
 
 
 ###
@@ -513,49 +513,6 @@ expectation <-
   )
 
 monitor.named.graphs()
-
-###
-
-
-# alternative expection style from JSON library ???
-#
-# update.body <- '{
-#   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb",
-#   "format": "Turtle"
-# }'
-#
-#
-# update.body <- '{
-#   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-#   "data": "https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl",
-#   "format": "RDF/XML"
-# }'
-#
-# update.body <- '{
-#   "context": "http://purl.obolibrary.org/obo/mondo.owl",
-#   "data": "https://github.com/monarch-initiative/mondo/releases/download/current/mondo.owl",
-#   "format": "RDF/XML"
-# }'
-#
-#
-# update.body <- '{
-#   "context": "https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl",
-#   "data": "https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl",
-#   "format": "RDF/XML"
-# }'
-#
-# update.body <- '{
-# "context": "https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl",
-# "data": "https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.ttl",
-# "format": "RDF/XML"
-# }'
-#
-# update.body <- '{
-#   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb",
-#   "format": "RDF/XML"
-# }'
 
 ###   ###   ###
 
@@ -1038,24 +995,6 @@ where {
 
 update.names <- names(update.list)
 
-# > update.names
-# [1] "materialize UMLS CUIs"                         "rewrite ?p mondo"
-# [3] "mondo ?p rewrite"                              "mondo dbxr literal"
-# [5] "isolate undefined mondo ?p rewrites"           "delete undefined mondo ?p rewrites from mondo"
-# [7] "isolate undefined rewrite ?p mondo"            "delete undefined rewrite ?p mondo from mondo"
-# [9] "isolate ?mondo ?p icd9 ranges"                 "delete ?mondo ?p icd9 ranges"
-# [11] "isolate ?icd9 ranges ?p mondo "                "delete ?icd9 ranges ?p mondo "
-# [13] "isolate mondo original statements"             "delete mondo original statements from mondo"
-# [15] "NLM ICD9CM to SNOMED mapping"                  "into to bool"
-# [17] "delete ints"                                   "migrate bools"
-# [19] "clear temp"                                    "materialize ICD9CM to snomed mappings"
-# [21] "isolation of ICD10 siblings"                   "deletion of ICD10 siblings"
-# [23] "isolation of ICD9 siblings"                    "deletion of ICD9 siblings"
-# [25] "defined in"                                    "someMaterializedMondoAxioms"
-# [27] "ICD9DiseaseInjuryTransitiveSubClasses"         "ICD10TransitiveSubClasses"
-# [29] "SnomedDiseaseTransitiveSubClasses"             "filteredMondoTransitiveSubClasses"
-# >
-
 # rewrite statements with consistent orientation
 #   and with URIs matching linked knowledgebases
 # also transitive materialization over knowledgebases (prior to path materializastion)
@@ -1076,13 +1015,6 @@ update.outer.result <-
     }
   })
 
-# could delete these graphs:
-#
-# http://example.com/resource/ICD10CM_siblings
-# http://example.com/resource/ICD9CM_siblings
-# http://example.com/resource/icd9range
-# http://example.com/resource/mondoOriginals
-# http://example.com/resource/undefinedRewrites
 
 if (delete.isolated.flag) {
   post.res <- POST(
