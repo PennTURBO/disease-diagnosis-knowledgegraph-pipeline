@@ -3,20 +3,23 @@ library(config)
 library(httr)
 library(jsonlite)
 
-debug.flag <- TRUE
-delete.isolated.flag <- FALSE
+# debug.flag <- FALSE
+# delete.isolated.flag <- FALSE
 
 # SNOMEDCT or SNOMEDCT_US?
 # UMLS uses "SNOMEDCT_US" as their source abbrevation, adn that's what umls2rdf URIs use
 
-# bioportal URIs are all versioned, so put them in yaml
+# # bioportal URIs are all versioned, so put them in yaml
+# ICD9CM.uri
+# ICD10CM.uri
+# umls.semantic.types.uri
 
 #
 
 
 # could have used: jsonlite? rjsonio? rjson?
-# slight differences in teh returned structure
-# need to match monitoring/expectation code
+# slight differences in the returned structure
+# need to match with monitoring/expectation code
 
 # switched to yaml config
 # refactored monitor.named.graphs into a function
@@ -31,7 +34,7 @@ delete.isolated.flag <- FALSE
 #     5440382 on Aug 12, 2019
 ###
 
-# also could  re-factor SPARQL prefixes
+# continue re-factoring SPARQL prefixes
 
 # maybe
 # materialize all of the paths and then flatten for Hayden
@@ -177,6 +180,15 @@ graphdb.address.port <-
 selected.repo <- selected.gdb.configuration$selected.repo
 api.user <- selected.gdb.configuration$api.user
 api.pass <- selected.gdb.configuration$api.pass
+
+debug.flag <- config.bootstrap$debug.flag
+delete.isolated.flag <- config.bootstrap$delete.isolated.flag
+
+# NEW
+ICD9CM.uri <- config.bootstrap$ICD9CM.uri
+ICD10CM.uri <- config.bootstrap$ICD10CM.uri
+umls.semantic.types.uri <- config.bootstrap$umls.semantic.types.uri
+
 
 saved.authentication <-
   authenticate(api.user, api.pass, type = "basic")
@@ -1072,7 +1084,7 @@ update.outer.result <-
 # http://example.com/resource/mondoOriginals
 # http://example.com/resource/undefinedRewrites
 
-if(delete.isolated.flag) {
+if (delete.isolated.flag) {
   post.res <- POST(
     update.endpoint,
     body = list(update = "clear graph <http://example.com/resource/ICD10CM_siblings>"),
