@@ -458,7 +458,50 @@ order by desc(count(distinct ?s))
 owl:Class|owl:Class|true|64721
 owl:Class|owl:Class|false|7334
 
-## Scripted Actions
+### ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
+
+(Ontorefine instantiation of two CSV files from [https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html))
+
+_Based on input from Anurag Verma, we are not using the General Equivalence Mappings from_ [https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage](https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage)
+
+```SPARQL
+select 
+?p (count(?s) as ?count)
+where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s ?p ?o .
+    }
+}
+group by ?p 
+order by desc(count(?s))
+```
+
+> Showing results from 1 to 15 of 15. Query took 1.3s, minutes ago.
+
+**p**|**count**
+:-----|-----:
+mydata:AVG\_USAGE|46645
+mydata:CORE\_USAGE|46645
+mydata:File|46645
+mydata:ICD\_CODE|46645
+mydata:ICD\_NAME|46645
+mydata:IN\_CORE|46645
+mydata:IP\_USAGE|46645
+mydata:IS\_1-1MAP|46645
+mydata:IS\_CURRENT\_ICD|46645
+mydata:IS\_NEC|46645
+mydata:OP\_USAGE|46645
+mydata:SNOMED\_CID|46645
+mydata:SNOMED\_FSN|46645
+rdf:type|46645
+https://www.nlm.nih.gov/research/umls/mapping\_projects/icd9cm\_to\_snomedct.html|45598
+
+_Why is the mapping predicate used 45598 times, but the others are all only used 46645 times?_
+
+_Note that the mapping predicate and graph name have been written with a trailing slash in some places and without in others. Standardize to WITHOUT_
+
+
+## Actions performed by [disease_diagnosis_dev.R](https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R) script
 
 ###  Materialize CUIs
 
@@ -773,44 +816,482 @@ where {
 
 > Removed 167354 statements. Update took 3.1s, moments ago.
 
-### ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
-
-(Ontorefine instantiation of two CSV files from [https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html))
-
-_Based on input from Anurag Verma, we are not using the General Equivalence Mappings from_ [https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage](https://www.cms.gov/Medicare/Coding/ICD10/index?redirect=/ICD10/01_Overview.asp#TopOfPage)
+### Tag ICD9->SNOMED predicates that should take a Boolean object
 
 ```SPARQL
-select 
-?p (count(?s) as ?count)
-where {
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert data {
     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        ?s ?p ?o .
+        mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
+        mydata:IS_NEC mydata:intPlaceholder true .
+        mydata:IS_1-1MAP mydata:intPlaceholder true .
+        mydata:IN_CORE mydata:intPlaceholder true .
+        <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
     }
 }
-group by ?p 
-order by desc(count(?s))
 ```
 
-> Showing results from 1 to 15 of 15. Query took 1.3s, minutes ago.
+> Added 5 statements. Update took 0.1s, moments ago.
 
-**p**|**count**
+
+### Enforce (cast) Boolean objects
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+        ?s ?p ?boolean
+    }
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?p mydata:intPlaceholder true .
+        ?s ?p ?int .
+        filter(datatype(?int)!=xsd:boolean)
+        bind(if(?int = "1", true, false) as ?boolean)
+    }
+}
+```
+
+_This has already been applied to the_ `www_nlm_nih_gov_research_umls_mapping_projects_icd9cm_to_snomedct.ttl` _input file, so it may seem like no action is taking place. There's no harm in leaving these steps in, and they might be required if the two (CSV) ICD9->SNOMED mapping  files had to be re-instantiated with OntoRefine or some other technology._
+
+Imported successfully in 18s.
+> Added 5 statements. Update took 0.1s, moments ago.
+
+### Delete the triples that have undesired integer objects
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+delete {
+    ?s ?p ?int .
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?p mydata:intPlaceholder true .
+        ?s ?p ?int .
+        filter(datatype(?int)!=xsd:boolean)
+    }
+}
+```
+
+>  The number of statements did not change
+
+### Migrate the desired triples with Boolean objects out of the temporary graph
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s ?p ?boolean
+    }
+}
+where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+        ?s ?p ?boolean
+    }
+}
+```
+
+> The number of statements did not change
+
+### Clear the temporary graph
+
+```SPARQL
+clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>
+```
+
+> The number of statements did not change
+
+### Materialize the ICD9->SNOMED mappings
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?snomed
+    }
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s mydata:ICD_CODE	?ICD_CODE	;
+           mydata:SNOMED_CID ?SNOMED_CID .
+        bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT/", ?SNOMED_CID)) as ?snomed)
+        bind(uri(concat("http://purl.bioontology.org/ontology/ICD9CM/", ?ICD_CODE)) as ?icd)
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+        ?snomed a owl:Class
+    }
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?icd a owl:Class
+    }
+}
+```
+
+> The number of statements did not change
+
+### _End of ICD9->SNOMED steps_
+
+### Isolate statements about ICD10 siblings
+
+_These statements don't add any knowledge over having a shared super-class, and they clutter up visualizations._
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert  {
+    graph <http://example.com/resource/ICD10CM_siblings> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+```
+
+> Added 458236 statements
+
+_Lost the timing data_
+
+### Delete siblings statements from ICD10 graph
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+delete  {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+```
+
+> Removed 458236 statements. Update took 8.8s, moments ago.
+
+
+### Isolate statements about ICD9 siblings
+
+_These statements don't add any knowledge over having a shared super-class, and they clutter up visualizations._
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert  {
+    graph <http://example.com/resource/ICD9CM_siblings> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+```
+
+> Added 138124 statements. Update took 2.7s, minutes ago.
+
+
+### Delete siblings statements from ICD9 graph
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+delete  {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+```
+
+> Removed 138124 statements. Update took 2.5s, moments ago.
+
+### Assert the named graph in which terms are defined
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph <http://example.com/resource/definedIn> {
+        ?s <http://example.com/resource/definedIn> ?g
+    }
+} where {
+    graph ?g {
+        ?s a owl:Class
+    }
+}
+```
+
+> Added 593053 statements. Update took 15s, moments ago.
+
+### Materialize simple MonDO disease axioms
+
+_This only acts on subclasses of simple `owl:Restriction`s. It (probably?) won't act on `rdfs:subClassOf` statements whose object is a  blank node, intersection, etc. Same thing for any `owl:equivalentClass` statements, although they tend to have those complex objects anyway._
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph mydata:materializedSimpleMondoAxioms {
+        ?term ?op ?valSource
+    }
+}
+where {
+    graph obo:mondo.owl {
+        ?term rdfs:subClassOf* ?restr .
+        # ?term rdfs:label ?termlab .
+        ?restr a owl:Restriction ;
+               owl:onProperty ?op ;
+               owl:someValuesFrom ?valSource .
+        # ?op rdfs:label ?opl .
+        # ?valSource rdfs:label ?vsl .
+        filter(isuri( ?term ))
+    }
+}
+```
+
+> Added 213298 statements. Update took 1m 26s, moments ago.
+
+### What are the roots of the ICD9CM taxonomy?
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+select 
+distinct ?s ?l
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s a owl:Class .
+        optional {
+            ?s skos:prefLabel ?l
+        }
+        minus {
+            ?s rdfs:subClassOf ?parent
+        }
+    }
+}
+```
+
+> Showing results from 1 to 2 of 2. Query took 0.4s, minutes ago.
+
+**s**|**l**
 :-----|-----:
-mydata:AVG\_USAGE|46645
-mydata:CORE\_USAGE|46645
-mydata:File|46645
-mydata:ICD\_CODE|46645
-mydata:ICD\_NAME|46645
-mydata:IN\_CORE|46645
-mydata:IP\_USAGE|46645
-mydata:IS\_1-1MAP|46645
-mydata:IS\_CURRENT\_ICD|46645
-mydata:IS\_NEC|46645
-mydata:OP\_USAGE|46645
-mydata:SNOMED\_CID|46645
-mydata:SNOMED\_FSN|46645
-rdf:type|46645
-https://www.nlm.nih.gov/research/umls/mapping\_projects/icd9cm\_to\_snomedct.html|45598
+http://purl.bioontology.org/ontology/STY/T051|Event
+http://purl.bioontology.org/ontology/STY/T071|Entity
 
-_Why is the mapping predicate used 45598 times, but the others are all only used 46645 times?_
+#### BioPortal says
 
-_Note that the mapping predicate and graph name have been written with a trailing slash in some places and without in others. Standardize to WITHOUT_
+- [DISEASES AND INJURIES](https://bioportal.bioontology.org/ontologies/ICD9CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD9CM%2F001-999.99)
+	-  ICD9CM:001-999.99
+- [PROCEDURES](https://bioportal.bioontology.org/ontologies/ICD9CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD9CM%2F00-99.99)
+	-   ICD9CM:00-99.99
+-  [SUPPLEMENTARY CLASSIFICATION OF EXTERNAL CAUSES OF INJURY AND POISONING](https://bioportal.bioontology.org/ontologies/ICD9CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD9CM%2FE000-E999.9)
+	-   ICD9CM:E000-E999.9
+- [SUPPLEMENTARY CLASSIFICATION OF FACTORS INFLUENCING HEALTH STATUS AND CONTACT WITH HEALTH SERVICES](https://bioportal.bioontology.org/ontologies/ICD9CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD9CM%2FV01-V91.99)
+	- ICD9CM:V01-V91.99
+
+### Transitively materialize sub-classes of ICD9 Diseases and Injuries
+
+```SPARQL
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sm: <tag:stardog:api:mapping:>
+PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+insert {
+    graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
+        ?sub rdfs:subClassOf ?s .
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        # + or * ?
+        ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
+        ?sub rdfs:subClassOf* ?s .
+    }
+}
+```
+
+> Added 81980 statements. Update took 12s, minutes ago.
+
+### What are the roots of the ICD10CM taxonomy?
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+select 
+distinct ?s ?l
+where {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s a owl:Class .
+        optional {
+            ?s skos:prefLabel ?l
+        }
+        minus {
+            ?s rdfs:subClassOf ?parent
+        }
+    }
+}
+```
+
+> Showing results from 1 to 3 of 3. Query took 1.2s, moments ago.
+
+**s**|**l**
+:-----|:-----
+http://purl.bioontology.org/ontology/STY/T051|Event
+http://purl.bioontology.org/ontology/STY/T071|Entity
+http://purl.bioontology.org/ontology/ICD10CM/ICD-10-CM|ICD-10-CM TABULAR LIST of DISEASES and INJURIES
+
+#### BioPortal says
+
+- [Certain conditions originating in the perinatal period (P00-P96)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FP00-P96)
+- [Certain infectious and parasitic diseases (A00-B99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FA00-B99)
+- [Congenital malformations, deformations and chromosomal abnormalities (Q00-Q99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FQ00-Q99)
+- [Diseases of the blood and blood-forming organs and certain disorders involving the immune mechanism (D50-D89)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FD50-D89)
+- [Diseases of the circulatory system (I00-I99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FI00-I99)
+- [Diseases of the digestive system (K00-K95)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FK00-K95)
+- [Diseases of the ear and mastoid process (H60-H95)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FH60-H95)
+- [Diseases of the eye and adnexa (H00-H59)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FH00-H59)
+- [Diseases of the genitourinary system (N00-N99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FN00-N99)
+- [Diseases of the musculoskeletal system and connective tissue (M00-M99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FM00-M99)
+- [Diseases of the nervous system (G00-G99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FG00-G99)
+- [Diseases of the respiratory system (J00-J99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FJ00-J99)
+- [Diseases of the skin and subcutaneous tissue (L00-L99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FL00-L99)
+- [Endocrine, nutritional and metabolic diseases (E00-E89)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FE00-E89)
+- [External causes of morbidity (V00-Y99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FV00-Y99)
+- [Factors influencing health status and contact with health services (Z00-Z99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FZ00-Z99)
+- [Injury, poisoning and certain other consequences of external causes (S00-T88)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FS00-T88)
+- [Mental, Behavioral and Neurodevelopmental disorders (F01-F99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FF01-F99)
+- [Neoplasms (C00-D49)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FC00-D49)
+- [Pregnancy, childbirth and the puerperium (O00-O9A)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FO00-O9A)
+- [Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)](https://bioportal.bioontology.org/ontologies/ICD10CM/?p=classes&conceptid=http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FICD10CM%2FR00-R99)
