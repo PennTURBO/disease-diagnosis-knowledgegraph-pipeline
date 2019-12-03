@@ -1,73 +1,194 @@
 library(SPARQL)
+library(config)
 library(httr)
 library(jsonlite)
-library(httr)
-library(config)
+
+debug.flag <- TRUE
+
+# bioportal URIs are all versioned, so put then in yaml
+
+# 
+
+
 # could have used: jsonlite? rjsonio? rjson?
+# slight differences in teh returned structure
+# need to match monitoring/expectation code
 
-# switch to yaml config
-# function for repeated tasks (like "named graph expectation")
-# what's an example of scripts that do use yaml and named graph monitoring fuction?
+# switched to yaml config
+# refactored monitor.named.graphs into a function
+# includes example of pure SPARQL::SPARQL update with authentication
+
+# what's an example of scripts that do use yaml and named graph monitoring function?
 #   tweencorn on http://pennturbo.org:8787/?
-
-# see also populate_disease_to_diagnosis_code_repo.R
-
+# see also
+#   https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/populate_disease_to_diagnosis_code_repo.R
+#     6672527 on Jun 20, 2019
+#   https://github.com/pennbiobank/turbo/blob/master/doodads/directEvidenceFor_transIcd.R
+#     5440382 on Aug 12, 2019
 ###
 
-# TODO: some repetitive posting and monitoring code?... re-factor into functions
 # also could  re-factor SPARQL prefixes
 
 # maybe
 # materialize all of the paths and then flatten for Hayden
-# don't peruse syndromes or congenital conditions from mondo (ok, at least reporting) SNOMEDCT (no action)
+# filter out rare diseases, syndromes or congenital conditions from mondo
+# haven't put SNOMEDCT filtering into production yet
 # cancer maps to lots of false positives?
-# apply over query labels, not the queries themselves?
-# materialize SNOMEDCT icd10 text mappings? might they just be the same as shared CUIs?
+# apply SPARQL updates over labels, not the queries themselves? (DONE?)
+# materialize SNOMEDCT's icd10 text mappings? they might just be the same as shared CUIs?
 
 ###
 
 
 # start by loading
 # snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT/
-# icd9 from the ums2rdf pipeline into http://purl.bioontology.org/ontology/ICD9CM/
-# icd10 from the ums2rdf pipeline into 	http://purl.bioontology.org/ontology/ICD10CM/
+# icd9  from BioPortal
+# icd10 from BioPortal
 # mondo from http://purl.obolibrary.org/obo/mondo.owl into http://purl.obolibrary.org/obo/mondo.owl
-#  my have to be staged as a file... GraphDB complains about loading some RDF files from web URLs
-# OK, just check the redirection path for the obolibrary URL and state that its RDF/XML formatted
+#   may have to be staged as a file? GraphDB complains about loading some RDF files from web URLs
+#   OK, just check the redirection path for the obolibrary URL and state that its RDF/XML formatted?
+# ontorefine instantation of
+#   https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
+#   from server graphdb-import folder
+#   previous dd scripts required loading the ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812 CSV files into OntoRefine projects
+#   and instantiated them on the fly
 
-# ontorefine source:
-# https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
-# but has also been saved as two projects that can be directly imported into graphdb servers
-# maybe that should just be saved as a RDF file on the server
-#  www.nlm.nih.gov-research-umls_mapping_projects-icd9cm_to_snomedct.html.brf.zip
+# SAPRQL used to instantiate two CSVs (imported into two projects)
+# from https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
+# with ontorefine
 
-# ICD9CM_SNOMED_MAP_1TO1_201812 1912899822059
-# ICD9CM_SNOMED_MAP_1TOM_201812 2239824072298
+# PREFIX mydata: <http://example.com/resource/>
+#   PREFIX spif: <http://spinrdf.org/spif#>
+# insert {
+#   graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#     ?myRowId a <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ;
+#     mydata:File ?File ;
+#     mydata:ICD_CODE ?ICD_CODE ;
+#     mydata:ICD_NAME ?ICD_NAME ;
+#     mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
+#     mydata:IP_USAGE ?IP_USAGE ;
+#     mydata:OP_USAGE ?OP_USAGE ;
+#     mydata:AVG_USAGE ?AVG_USAGE ;
+#     mydata:IS_NEC ?IS_NEC ;
+#     mydata:SNOMED_CID ?SNOMED_CID ;
+#     mydata:SNOMED_FSN ?SNOMED_FSN ;
+#     mydata:IS_1-1MAP ?IS_1_1MAP ;
+#     mydata:CORE_USAGE ?CORE_USAGE ;
+#     mydata:IN_CORE ?IN_CORE .
+#   }
+# } WHERE {
+#   SERVICE <SOME ONTOREFINE PROJECT CODE> {
+#   ?row a mydata:Row ;
+#   mydata:File ?File ;
+#   mydata:ICD_CODE ?ICD_CODE .
+#   optional {
+#     ?row mydata:ICD_NAME ?ICD_NAME ;
+#   }
+#   optional {
+#     ?row mydata:IS_CURRENT_ICD ?IS_CURRENT_ICD ;
+#   }
+#   optional {
+#     ?row  mydata:IP_USAGE ?IP_USAGE ;
+#   }
+#   optional {
+#     ?row  mydata:OP_USAGE ?OP_USAGE ;
+#   }
+#   optional {
+#     ?row  mydata:AVG_USAGE ?AVG_USAGE ;
+#   }
+#   optional {
+#     ?row  mydata:IS_NEC ?IS_NEC ;
+#   }
+#   optional {
+#     ?row  mydata:SNOMED_CID ?SNOMED_CID ;
+#   }
+#   optional {
+#     ?row  mydata:SNOMED_FSN ?SNOMED_FSN ;
+#   }
+#   optional {
+#     ?row  mydata:IS_1-1MAP ?IS_1_1MAP ;
+#   }
+#   optional {
+#     ?row  mydata:CORE_USAGE ?CORE_USAGE ;
+#   }
+#   optional {
+#     ?row  mydata:IN_CORE ?IN_CORE .
+#   }
+#   BIND(uuid() AS ?myRowId)
+# }
+# }'
+
+
+# bioportal has ICDs (including ICDO!)
+# http://bioportal.bioontology.org/ontologies/ICD-O-3-M
+# http://bioportal.bioontology.org/ontologies/ICD-O-3-T
+# but may be a few months behind the UMLS may/November releases ?
+# http://bioportal.bioontology.org/ontologies/ICD10CM
+# there's no public snomed RDF release at this point
+# they're working on one, and currently provide a Perl script
+# https://confluence.ihtsdotools.org/display/DOCTSG/9.2.6+SNOMED+CT+OWL+Distribution+FAQ
+
+# version predictes:
+# subject	predicate	object	context
+# http://purl.bioontology.org/ontology/ICD10CM/ 	owl:versionInfo 	2019aa	http://purl.bioontology.org/ontology/ICD10CM/
+# http://purl.bioontology.org/ontology/ICD9CM/ 	owl:versionInfo 	2019aa	http://purl.bioontology.org/ontology/ICD9CM/
+# snomed: 	owl:versionInfo 	2019aa	snomed:
+
+# subject	predicate	object	context
+# obo:mondo.owl 	owl:versionIRI 	obo:mondo/releases/2019-07-28/mondo.owl 	obo:mondo.owl
+
+# repos (or individual named graphs) can be dumped with something like this.
+# be sure to save into the graphdb-import folder in conf/graphdb.properties
+
+# $ curl -X GET --header 'Accept: application/x-binary-rdf' 'http://localhost:7200/repositories/dd_by_wire/statements' -o snomed_icd_9_10_cm_2019aa.brf
+# % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+# Dload  Upload   Total   Spent    Left  Speed
+# 100  887M    0  887M    0     0  13.1M      0 --:--:--  0:01:07 --:--:-- 9515k
+
+# turbo ontology good for testing loading methods
+# https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl
+# see also https://wheregoes.com/retracer.php
+# don't forget to assert type as RDF/XML ?
 
 ###
 
-monitor.pause.seconds <- 10
+config.bootstrap <-
+  config::get(file = "disease_diagnosis.yaml")
 
-selected.gdb.configuration <- "pennturbo_lightsail_remote"
+selected.gdb.configuration <-
+  config::get(config = config.bootstrap$selected.gdb.configuration,
+              file = "disease_diagnosis.yaml")
 
-gdb.config <-
-  config::get(config = selected.gdb.configuration, file = "disease_diagnosis.yaml")
+monitor.pause.seconds <- config.bootstrap$monitor.pause.seconds
+snomed.triples.file <-
+  selected.gdb.configuration$snomed.triples.file
+icd9_to_snomed.triples.file <-
+  selected.gdb.configuration$icd9_to_snomed.triples.file
 
-graphdb.address.port <- gdb.config$graphdb.address.port
-selected.repo <- gdb.config$selected.repo
-api.user <- gdb.config$api.user
-api.pass <- gdb.config$api.pass
+# does this ever get used?
+bp.api.key <- config.bootstrap$bp.api.key
+
+graphdb.address.port <-
+  selected.gdb.configuration$graphdb.address.port
+selected.repo <- selected.gdb.configuration$selected.repo
+api.user <- selected.gdb.configuration$api.user
+api.pass <- selected.gdb.configuration$api.pass
 
 saved.authentication <-
   authenticate(api.user, api.pass, type = "basic")
 
 sparql.prefixes <- "
+PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+PREFIX mydata: <http://example.com/resource/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ontologies: <http://transformunify.org/ontologies/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sm: <tag:stardog:api:mapping:>
 PREFIX turbo: <http://transformunify.org/ontologies/>
+PREFIX umls: <http://bioportal.bioontology.org/ontologies/umls/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 "
 
@@ -80,18 +201,20 @@ update.endpoint <-
 select.endpoint <-
   paste0(graphdb.address.port, "/repositories/", selected.repo)
 
-post.endpoint <-
+url.post.endpoint <-
   paste0(graphdb.address.port,
          "/rest/data/import/upload/",
          selected.repo,
          "/url")
 
-### THIS SHOULDN'T DEPEND ON THE ORDER IN WHICH THE GRAPHS ARE REPORTED
+filesystem.post.endpoint <-
+  paste0(graphdb.address.port,
+         "/rest/data/import/server/",
+         selected.repo,
+         "/")
+
 # THE DIFFERENT JSON LIBRARIES RETURN THE CONTENTS IN DIFFERENT FORMATS
 # SOME OF WHICH MAY BE MORE CONVENIENT THAN OTHERS
-
-
-
 
 monitor.named.graphs <- function() {
   while (TRUE) {
@@ -112,7 +235,7 @@ monitor.named.graphs <- function() {
     context.report <-
       context.report$results$bindings$contextID$value
     
-    # SHUOLD THESE BE LEFT AS GLOBALS OR BE SWTICHED TO FUNCTION PARAMETERS?
+    # SHOULD THESE BE LEFT AS GLOBALS OR BE SWITCHED TO FUNCTION PARAMETERS?
     print(paste0(Sys.time(),
                  ": '",
                  post.status,
@@ -121,16 +244,16 @@ monitor.named.graphs <- function() {
     # print(paste0("Expecting graphs ", expectation, collapse = " ; "))
     # print(paste0("Current graphs ", context.report, collapse = " ; "))
     
-    print(paste0("Expecting graphs ", expectation))
-    print(paste0("Current graphs ", context.report))
+    print(paste0("Expected graphs: ", sort(expectation)))
+    print(paste0("Current graphs:  ", sort(context.report)))
     
     print(paste0("Next check in ",
                  monitor.pause.seconds,
                  " seconds."))
     
-    Sys.sleep(10)
+    Sys.sleep(monitor.pause.seconds)
     moveon <- setdiff(expectation, context.report)
-    # will this properly handle the case when the report is mepty (NULL)?
+    # will this properly handle the case when the report is empty (NULL)?
     if (length(moveon) == 0) {
       print("Update complete")
       break()
@@ -212,12 +335,9 @@ sparql.result <-
     )
   )
 
-
-# test by loading
-# https://raw.githubusercontent.com/PennTURBO/Turbo-Ontology/master/ontologies/turbo_merged.owl
-# see also https://wheregoes.com/retracer.php
-# don't forget to assert type as
-# RDF/XML
+# Warning message:
+#   In testCurlOptionsInFormParameters(.params) :
+#   Found possible curl options in form parameters: userpwd, httpauth
 
 expectation <- NULL
 
@@ -231,20 +351,15 @@ update.body <- '{
   "format": "RDF/XML"
 }'
 
-placeholder <- POST(
-  # post.dest,
-  # body = bod4post,
-  post.endpoint,
+post.res <- POST(
+  url.post.endpoint,
   body = update.body,
   content_type("application/json"),
   accept("application/json"),
   saved.authentication
 )
 
-
-# status.ph <- rawToChar(placeholder$content)
-# submission.time <- Sys.time()
-post.status <- rawToChar(placeholder$content)
+post.status <- rawToChar(post.res$content)
 post.time <- Sys.time()
 
 ### ICD9CM
@@ -253,23 +368,18 @@ update.body <- '{
   "type":"url",
   "format":"text/turtle",
   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-  "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=9cf735c3-a44a-404f-8b2f-c49d48b2b8b2"
+  "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
 }'
 
-placeholder <- POST(
-  # post.dest,
-  # body = bod4post,
-  post.endpoint,
+post.res <- POST(
+  url.post.endpoint,
   body = update.body,
   content_type("application/json"),
   accept("application/json"),
   saved.authentication
 )
 
-
-# status.ph <- rawToChar(placeholder$content)
-# submission.time <- Sys.time()
-post.status <- rawToChar(placeholder$content)
+post.status <- rawToChar(post.res$content)
 post.time <- Sys.time()
 
 ### ICD10CM
@@ -282,10 +392,38 @@ update.body <- '{
   "data": "http://data.bioontology.org/ontologies/ICD10CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
 }'
 
-placeholder <- POST(
-  # post.dest,
-  # body = bod4post,
-  post.endpoint,
+post.res <- POST(
+  url.post.endpoint,
+  body = update.body,
+  content_type("application/json"),
+  accept("application/json"),
+  saved.authentication
+)
+
+post.status <- rawToChar(post.res$content)
+post.time <- Sys.time()
+
+
+### semantic types
+# I used to include these in each bioportal export
+#   and in a separate file
+# now I'm doing separate file only
+# no ontology name is asserted in the file
+# graph/context name?
+# https://bioportal.bioontology.org/ontologies/STY ?
+# http://purl.bioontology.org/ontology/STY/ ?
+# https://www.nlm.nih.gov/research/umls/META3_current_semantic_types.html ?
+
+
+update.body <- '{
+  "type":"url",
+  "format":"text/turtle",
+  "context": "http://purl.bioontology.org/ontology/STY/",
+  "data": "http://data.bioontology.org/ontologies/STY/submissions/14/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
+}'
+
+post.res <- POST(
+  url.post.endpoint,
   body = update.body,
   content_type("application/json"),
   accept("application/json"),
@@ -293,59 +431,81 @@ placeholder <- POST(
 )
 
 
-# status.ph <- rawToChar(placeholder$content)
-# submission.time <- Sys.time()
-post.status <- rawToChar(placeholder$content)
+post.status <- rawToChar(post.res$content)
 post.time <- Sys.time()
+
+### icd9<->snomed mappings from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html,
+# direct-map instantiated with OntoRefine, and saved to turtle file
+# named graph?
+
+update.body <- paste0(
+  '{
+  "fileNames": ["',
+  icd9_to_snomed.triples.file,
+  '"],
+  "importSettings": { "context": "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html" }
+}'
+)
+
+# update.body
+#
+# filesystem.post.endpoint
+
+post.res <- POST(
+  filesystem.post.endpoint,
+  body = update.body,
+  content_type("application/json"),
+  accept("application/json"),
+  saved.authentication
+)
+
+# ### snomed
+# # use umls2rdf pipeline and save on local filesystem
+# # DOCUMENTATION  = https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev_inc_prep.md
+
+update.body <- paste0(
+  '{
+  "fileNames": ["',
+  snomed.triples.file,
+  '"],
+  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT/" }
+}'
+)
+
+post.res <- POST(
+  filesystem.post.endpoint,
+  body = update.body,
+  content_type("application/json"),
+  accept("application/json"),
+  saved.authentication
+)
+
+status.ph <- rawToChar(post.res$content)
+print(status.ph)
+
+
+###
 
 expectation <-
   c(
     "http://purl.obolibrary.org/obo/mondo.owl",
     "http://purl.bioontology.org/ontology/ICD9CM/",
-    "http://purl.bioontology.org/ontology/ICD10CM/"
+    "http://purl.bioontology.org/ontology/ICD10CM/",
+    "http://purl.bioontology.org/ontology/SNOMEDCT/",
+    "http://purl.bioontology.org/ontology/STY/",
+    "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html"
   )
 
 monitor.named.graphs()
 
 ###
 
-# ###
+
+# alternative expection style from JSON library ???
 #
-#
-# # bp_api:
-# #   api_key: '9cf735c3-a44a-404f-8b2f-c49d48b2b8b2'
-#
-# # advertised
-# # http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb
-#
-# # customized
-# # http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=9cf735c3-a44a-404f-8b2f-c49d48b2b8b2
-#
-# expectation <-
-#   list(head = list(vars = "contextID"),
-#        results = list(bindings = list(
-#          list(
-#            contextID = list(type = "uri", value = "http://purl.obolibrary.org/obo/mondo.owl")
-#          ),
-#          list(
-#            contextID = list(type = "uri", value = "http://purl.bioontology.org/ontology/ICD10CM/")
-#          ),
-#          list(
-#            contextID = list(type = "uri", value = "http://purl.bioontology.org/ontology/ICD9CM/")
-#          ),
-#          list(
-#            contextID = list(type = "uri", value = "http://purl.bioontology.org/ontology/SNOMEDCT/")
-#          )
-#        )))
-#
-#
-#
-# ###
-#
-# # the version in embedded in teh URL, so this should become a configuration parameter
 # update.body <- '{
 #   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=9cf735c3-a44a-404f-8b2f-c49d48b2b8b2",
+#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb",
 #   "format": "Turtle"
 # }'
 #
@@ -377,29 +537,653 @@ monitor.named.graphs()
 #
 # update.body <- '{
 #   "context": "http://purl.bioontology.org/ontology/ICD9CM/",
-#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=9cf735c3-a44a-404f-8b2f-c49d48b2b8b2",
+#   "data": "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb",
 #   "format": "RDF/XML"
 # }'
+
+###   ###   ###
+
+### ARE ANY OF THESE NOTES, UP TO "update.list <- list()" STILL RELEVANT?
+
+# currently trying direct links only, EXCEPT transitive over snomed
+# then expand over ICD subclasses to be uniform with snomed transitivity
+# then OPTIONALLY expand over MonDO subclasses, with axiom filter? in real time?
+
+# should mondo "originals" be expanded to also include ?s owl:equivalentClass ?restriction (blank node)?
+# should evidence be materialized directly only, and only dynamically over mondo subclasses?
+#   would enable better axiomatic filtering
+
+# select distinct ?g ?p
+# where {
+#   ?s  <http://example.com/resource/definedIn> <http://purl.obolibrary.org/obo/mondo.owl> .
+#   graph ?g {
+#     ?s ?p ?o .
+#   }
+#   filter (isblank(?o))
+# }
 #
+# g	p
+# mydata:filteredMondoTransitiveSubClasses 	rdfs:subClassOf
+# obo:mondo.owl 	rdfs:subClassOf
+# obo:mondo.owl 	owl:equivalentClass
+# obo:mondo.owl 	owl:intersectionOf
+# obo:mondo.owl 	owl:unionOf
+
+
+# phase 1, organized topically not sequentially
+# "materialize UMLS CUIs"
+# "defined in"
+
+# rewrites: "rewrite ?p mondo", "mondo ?p rewrite", "mondo dbxr literal"
+
+# isolate (move to another graph) and delete from original graph:
+#  "undefined mondo ?p rewrites", "undefined rewrite ?p mondo",
+#  "?mondo ?p icd9 ranges", "?icd9 ranges ?p mondo"
+#  "ICD10 siblings", "ICD9 siblings"
+
+# *** "isolate mondo original statements"
+# where {
+#   graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#     values ?p {
+#       skos:exactMatch
+#       skos:closeMatch
+#       # skos:narrowMatch
+#       owl:equivalentClass
+#     }
+#     ?s ?p ?o
+#     filter(isuri(?o))
+#   }
+# }
+# "someMaterializedMondoAxioms"
+# turned filter off!
+# "filteredMondoTransitiveSubClasses"
+
+# "NLM ICD9CM to SNOMED mapping... tag booleans"
+# "ints to to bool", "delete ints", "migrate bools", "clear temp"
+
+# "materialize ICD9CM to snomed mappings"
+
+# "ICD9DiseaseInjuryTransitiveSubClasses"
+# "ICD10TransitiveSubClasses"
+# "SnomedDiseaseTransitiveSubClasses"
+
+###   ###   ###
+
+update.list <- list(
+  "materialize UMLS CUIs" = '
+insert {
+    graph <http://example.com/resource/materializedCui> {
+        ?c a  <http://example.com/resource/materializedCui> .
+        ?s <http://example.com/resource/materializedCui> ?c
+    }
+} where {
+    ?s umls:cui ?o .
+    bind(uri(concat("http://example.com/cui/", ?o)) as ?c)
+}',
+  "rewrite ?p mondo" = '
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        values (?mondoPattern ?rewritePattern) {
+            ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?external  ?p ?mondo .
+        filter(strstarts(str(?external),?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+    }
+}
+',
+"mondo ?p rewrite" = '
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        values (?mondoPattern ?rewritePattern) {
+            ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?mondo ?p ?external .
+        filter(strstarts(str(?external),?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+    }
+}
+',
+"mondo dbxr literal" = '
+insert {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo mydata:mdbxr ?rewrite
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values (?mondoPattern ?rewritePattern) {
+            ("UMLS:" "http://example.com/cui/")
+            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("ICD10:" "http://purl.bioontology.org/ontology/ICD10CM/")
+            ("ICD9:" "http://purl.bioontology.org/ontology/ICD9CM/")
+        }
+        ?mondo <http://www.geneontology.org/formats/oboInOwl#hasDbXref> ?external .
+        filter(strstarts(?external,?mondoPattern))
+        filter(strstarts(str(?mondo),"http://purl.obolibrary.org/obo/MONDO_"))
+        bind(uri(concat(?rewritePattern,strafter(str(?external),?mondoPattern))) as ?rewrite)
+    }
+}
+',
+"isolate undefined mondo rewrites" = '
+insert {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?mondo ?p ?rewrite
+            }
+        }
+        union {
+            {
+                graph <http://example.com/resource/rewrites_MonDO_subject> {
+                    ?mondo ?p ?rewrite
+                }
+            }
+        }
+    }
+    minus {
+        ?rewrite a ?t
+    }
+}
+',
+"delete undefined reverse rewrites from mondo" = '
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+',
+"delete undefined forward rewrites from mondo" = '
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/undefinedRewrites> {
+        ?mondo ?p ?rewrite
+    }
+}
+',
+"isolate ?mondo ?p icd9 ranges" = '
+insert {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?mondo ?p ?rewrite
+            }
+        }
+        union {
+            {
+                graph <http://example.com/resource/rewrites_MonDO_subject> {
+                    ?mondo ?p ?rewrite
+                }
+            }
+        }
+    }
+    filter(strstarts(str( ?rewrite ),"http://purl.bioontology.org/ontology/ICD9CM/"))
+    filter(contains(str( ?rewrite),"-"))
+}
+',
+"delete forward icd9 ranges" = '
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_subject> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+',"delete reverse icd9 ranges" = '
+delete {
+    graph <http://example.com/resource/rewrites_MonDO_object> {
+        ?mondo ?p ?rewrite
+    }
+}
+where {
+    graph <http://example.com/resource/icd9range> {
+        ?mondo ?p ?rewrite
+    }
+}
+',
+# leaves behind equivalent-to-restriction/blank node statements
+"isolate mondo rewritable external-link statements" = '
+insert {
+    graph <http://example.com/resource/mondoOriginals> {
+        ?s ?p ?o
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        values ?p {
+            skos:exactMatch
+            skos:closeMatch
+            # skos:narrowMatch
+            owl:equivalentClass
+        }
+        ?s ?p ?o
+        filter(isuri(?o))
+    }
+}
+',
+"delete mondo original statements from mondo" = '
+delete {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s ?p ?o
+    }
+}
+where {
+    graph <http://example.com/resource/mondoOriginals> {
+        ?s ?p ?o
+    }
+}
+')
+# ,
 #
-# placeholder <- POST(
-#   # post.dest,
-#   # body = bod4post,
-#   post.endpoint,
-#   body = update.body,
-#   content_type("application/json"),
-#   accept("application/json"),
-#   saved.authentication
+# "NLM ICD9CM to SNOMED mapping... tag booleans" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# insert data {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
+#         mydata:IS_NEC mydata:intPlaceholder true .
+#         mydata:IS_1-1MAP mydata:intPlaceholder true .
+#         mydata:IN_CORE mydata:intPlaceholder true .
+#         <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
+#     }
+# }',
+#
+# "ints to to bool"=
+# 'PREFIX mydata: <http://example.com/resource/>
+# insert {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+#         ?s ?p ?boolean
+#     }
+# } where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?p mydata:intPlaceholder true .
+#         ?s ?p ?int .
+#         bind(if(?int = "1", true, false) as ?boolean)
+#     }
+# }',
+# "delete ints" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# delete {
+#     ?s ?p ?int .
+# } where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?p mydata:intPlaceholder true .
+#         ?s ?p ?int .
+#     }
+# }',
+# "migrate bools" = 'insert {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?s ?p ?boolean
+#     }
+# }
+# where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+#         ?s ?p ?boolean
+#     }
+# }',
+# "clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
+#
+# "materialize ICD9CM to snomed mappings" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# insert {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?snomed
+#     }
+# } where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?s mydata:ICD_CODE	?ICD_CODE	;
+#            mydata:SNOMED_CID ?SNOMED_CID .
+#         bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT/", ?SNOMED_CID)) as ?snomed)
+#         bind(uri(concat("http://purl.bioontology.org/ontology/ICD9CM/", ?ICD_CODE)) as ?icd)
+#     }
+#     graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+#         ?snomed a owl:Class
+#     }
+#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#         ?icd a owl:Class
+#     }
+# }'
+# ,
+#
+# "isolation of ICD10 siblings" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# insert  {
+#     graph <http://example.com/resource/ICD10CM_siblings> {
+#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+#     }
+# }
+# where {
+#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+#     }
+# }',
+# "deletion of ICD10 siblings" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# delete  {
+#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+#     }
+# }
+# where {
+#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+#     }
+# }'
+# ,
+# "isolation of ICD9 siblings" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# insert  {
+#     graph <http://example.com/resource/ICD9CM_siblings> {
+#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+#     }
+# }
+# where {
+#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+#     }
+# }',
+# "deletion of ICD9 siblings" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# delete  {
+#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+#     }
+# }
+# where {
+#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+#     }
+# }',
+# "defined in" =
+# 'PREFIX mydata: <http://example.com/resource/>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# insert {
+#     graph <http://example.com/resource/definedIn> {
+#         ?s <http://example.com/resource/definedIn> ?g
+#     }
+# } where {
+#     graph ?g {
+#         ?s a owl:Class
+#     }
+# }',
+# # does this miss equivalentCLass axioms and more complex subClassOf axioms (ie with intersections)?
+# "someMaterializedMondoAxioms" = '
+# PREFIX mydata: <http://example.com/resource/>
+# PREFIX obo: <http://purl.obolibrary.org/obo/>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# insert {
+#         graph mydata:materializedMondoAxioms {
+#     ?term ?op ?valSource
+#     }
+# }
+# where {
+#     graph obo:mondo.owl {
+#         ?term rdfs:subClassOf* ?restr ;
+#                              rdfs:label ?termlab .
+#         ?restr a owl:Restriction ;
+#                owl:onProperty ?op ;
+#                owl:someValuesFrom ?valSource .
+#         ?op rdfs:label ?opl .
+#         ?valSource rdfs:label ?vsl .
+#         filter(isuri( ?term ))
+#     }
+# }
+# #limit 99',
+# "ICD9DiseaseInjuryTransitiveSubClasses" = '
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+# PREFIX mydata: <http://example.com/resource/>
+#   insert {
+#     graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
+#       ?sub rdfs:subClassOf ?s .
+#     }
+#   }
+# where {
+#   graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#     # + or * ?
+#     ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
+#     ?sub rdfs:subClassOf* ?s .
+#   }
+# }',
+# "ICD10TransitiveSubClasses" = '
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+# PREFIX mydata: <http://example.com/resource/>
+#   insert {
+#     graph mydata:ICD10TransitiveSubClasses {
+#       ?sub rdfs:subClassOf ?s .
+#     }
+#   }
+# where {
+#   graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#     # + or * ?
+#     ?s rdfs:subClassOf+ owl:Thing .
+#     ?sub rdfs:subClassOf* ?s .
+#   }
+# }',
+# "SnomedDiseaseTransitiveSubClasses" = '
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+# PREFIX mydata: <http://example.com/resource/>
+#   insert {
+#     graph mydata:SnomedDiseaseTransitiveSubClasses {
+#       ?sub rdfs:subClassOf ?s .
+#     }
+#   }
+# where {
+#   graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
+#     # + or * ?
+#     ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT/64572001> .
+#     ?sub rdfs:subClassOf* ?s .
+#   }
+# }'
+# ,
+# "filteredMondoTransitiveSubClasses" = '
+# PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
+# PREFIX mydata: <http://example.com/resource/>
+# PREFIX obo: <http://purl.obolibrary.org/obo/>
+# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+# PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# insert {
+#     graph mydata:filteredMondoTransitiveSubClasses {
+#         ?mondoSub rdfs:subClassOf ?mondo .
+#     }
+# }
+# where {
+#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#         ?mondoSub rdfs:subClassOf* ?mondo .
+#     }
+#     # minus {
+#     #     graph <http://example.com/resource/materializedMondoAxioms> {
+#     #         ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
+#     #     }
+#     # }
+# }'
 # )
+
+update.names <- names(update.list)
+
+# > update.names
+# [1] "materialize UMLS CUIs"                         "rewrite ?p mondo"
+# [3] "mondo ?p rewrite"                              "mondo dbxr literal"
+# [5] "isolate undefined mondo ?p rewrites"           "delete undefined mondo ?p rewrites from mondo"
+# [7] "isolate undefined rewrite ?p mondo"            "delete undefined rewrite ?p mondo from mondo"
+# [9] "isolate ?mondo ?p icd9 ranges"                 "delete ?mondo ?p icd9 ranges"
+# [11] "isolate ?icd9 ranges ?p mondo "                "delete ?icd9 ranges ?p mondo "
+# [13] "isolate mondo original statements"             "delete mondo original statements from mondo"
+# [15] "NLM ICD9CM to SNOMED mapping"                  "into to bool"
+# [17] "delete ints"                                   "migrate bools"
+# [19] "clear temp"                                    "materialize ICD9CM to snomed mappings"
+# [21] "isolation of ICD10 siblings"                   "deletion of ICD10 siblings"
+# [23] "isolation of ICD9 siblings"                    "deletion of ICD9 siblings"
+# [25] "defined in"                                    "someMaterializedMondoAxioms"
+# [27] "ICD9DiseaseInjuryTransitiveSubClasses"         "ICD10TransitiveSubClasses"
+# [29] "SnomedDiseaseTransitiveSubClasses"             "filteredMondoTransitiveSubClasses"
+# >
+
+# rewrite statements with consistent orientation
+#   and with URIs consistent with linked knowledgebases
+# also shallow materialization, but NOT transitive materializations
+update.outer.result <-
+  lapply(update.names, function(current.name) {
+    current.update <- update.list[[current.name]]
+    print(current.name)
+    current.update <- paste0(sparql.prefixes, current.update, "\n")
+    if (debug.flag) {
+      cat(current.update)
+    } else {
+      print(Sys.time())
+      post.res <- POST(update.endpoint,
+                       body = list(update = current.update),
+                       saved.authentication)
+      print(post.res$times[['total']])
+    }
+  })
+
+# could delete these graphs:
 #
-# rawToChar(placeholder$content)
-#
-#
-# # status.ph <- rawToChar(placeholder$content)
-# # submission.time <- Sys.time()
-# post.status <- rawToChar(placeholder$content)
-# post.time <- Sys.time()
-#
-#
-# ###
-#
+# http://example.com/resource/ICD10CM_siblings
+# http://example.com/resource/ICD9CM_siblings
+# http://example.com/resource/icd9range
+# http://example.com/resource/mondoOriginals
+# http://example.com/resource/undefinedRewrites
+
+
+post.res <- POST(
+  update.endpoint,
+  body = list(update = "clear graph <http://example.com/resource/ICD10CM_siblings>"),
+  saved.authentication
+)
+
+
+post.res <- POST(
+  update.endpoint,
+  body = list(update = "clear graph <http://example.com/resource/ICD9CM_siblings>"),
+  saved.authentication
+)
+
+post.res <- POST(
+  update.endpoint,
+  body = list(update = "clear graph <http://example.com/resource/icd9range>"),
+  saved.authentication
+)
+
+post.res <- POST(
+  update.endpoint,
+  body = list(update = "clear graph <http://example.com/resource/mondoOriginals>"),
+  saved.authentication
+)
+
+post.res <- POST(
+  update.endpoint,
+  body = list(update = "clear graph <http://example.com/resource/undefinedRewrites>"),
+  saved.authentication
+)
+
+# deletion justifications:
+# siblings (predicate = http://purl.bioontology.org/ontology/ICD10CM/SIB) are accessible as children of the same
+#   parent class and just make visualizations to busy
+# we have decided not to pursue the ~ 30 MonDO database cross-references (http://example.com/resource/mdbxr)
+#   to ICD ranges like obo:MONDO_0005002 mydata:mdbxr http://purl.bioontology.org/ontology/ICD9CM/490-496.99
+#   implies asthma is a kind of COPD
+# "mondo originals" includes these pre-re-written relations... don't want to retain them, just the rewrites
+#             skos:exactMatch
+#             skos:closeMatch
+#             # skos:narrowMatch
+#             owl:equivalentClass
+# undefinedRewrites contains mentions of terms that are not asserted in some source ontology.
+#   it could be a CUI that just isn't present in ICD-X or snomed
+#   http://example.com/cui/C0001139 owl:equivalentClass obo:MONDO_0006635
+#   where the contexts for C0001139 are medra and mesh and ndfrt
+#   obo:MONDO_0037872 owl:equivalentClass http://purl.bioontology.org/ontology/SNOMEDCT/26484003 (26484003 is retired)
+#   or it could be a mangled ICD code
+#   obo:MONDO_0006015 mydata:mdbxr http://purl.bioontology.org/ontology/ICD10CM/A39.1+
+
+
+# https://www.verywellhealth.com/icd-10-codes-and-how-do-they-work-1738471
+# # The first 3 characters define the category of the disease, disorder, infection or symptom.
+# For example, codes starting with M00-M99 are for diseases of the musculoskeletal system and connective tissue
+# (like rheumatoid arthritis), while codes starting with J00-J99 are for diseases of the respiratory system.
+# # Characters in positions 4-6 define the body site, severity of the problem, cause of the injury or disease,
+# and other clinical details. In the rheumatoid arthritis example above, the fifth character defines the body site
+# and the sixth character defines whether it’s the left or right side. A three in the fifth character position denotes
+# it’s a wrist that’s affected. A two in the sixth character position denotes it’s the left side of the body that’s affected.
+# # Character 7 is an extension character used for varied purposes such as defining whether this is the initial encounter
+# for this problem, a subsequent encounter, or sequela arising as a result of another condition.
+
+
+###   ###   ###
+
