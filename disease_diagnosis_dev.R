@@ -4,10 +4,14 @@ library(httr)
 library(jsonlite)
 
 debug.flag <- TRUE
+delete.isolated.flag <- FALSE
 
-# bioportal URIs are all versioned, so put then in yaml
+# SNOMEDCT or SNOMEDCT_US?
+# UMLS uses "SNOMEDCT_US" as their source abbrevation, adn that's what umls2rdf URIs use
 
-# 
+# bioportal URIs are all versioned, so put them in yaml
+
+#
 
 
 # could have used: jsonlite? rjsonio? rjson?
@@ -41,7 +45,7 @@ debug.flag <- TRUE
 
 
 # start by loading
-# snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT/
+# snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT_US/
 # icd9  from BioPortal
 # icd10 from BioPortal
 # mondo from http://purl.obolibrary.org/obo/mondo.owl into http://purl.obolibrary.org/obo/mondo.owl
@@ -468,7 +472,7 @@ update.body <- paste0(
   "fileNames": ["',
   snomed.triples.file,
   '"],
-  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT/" }
+  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT_US/" }
 }'
 )
 
@@ -491,7 +495,7 @@ expectation <-
     "http://purl.obolibrary.org/obo/mondo.owl",
     "http://purl.bioontology.org/ontology/ICD9CM/",
     "http://purl.bioontology.org/ontology/ICD10CM/",
-    "http://purl.bioontology.org/ontology/SNOMEDCT/",
+    "http://purl.bioontology.org/ontology/SNOMEDCT_US/",
     "http://purl.bioontology.org/ontology/STY/",
     "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html"
   )
@@ -636,8 +640,8 @@ where {
         }
         values (?mondoPattern ?rewritePattern) {
             ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
-            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
-            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
             ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -664,8 +668,8 @@ where {
         }
         values (?mondoPattern ?rewritePattern) {
             ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
-            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
-            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
             ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -686,7 +690,7 @@ where {
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
         values (?mondoPattern ?rewritePattern) {
             ("UMLS:" "http://example.com/cui/")
-            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
             ("ICD10:" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("ICD9:" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -815,8 +819,7 @@ where {
     }
 }
 ',
-"delete mondo original statements from mondo" = '
-delete {
+"delete mondo original statements from mondo" = 'delete {
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
         ?s ?p ?o
     }
@@ -825,254 +828,201 @@ where {
     graph <http://example.com/resource/mondoOriginals> {
         ?s ?p ?o
     }
+}',
+"NLM ICD9CM to SNOMED mapping... tag predicates taking booleans" =
+  'insert data {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
+        mydata:IS_NEC mydata:intPlaceholder true .
+        mydata:IS_1-1MAP mydata:intPlaceholder true .
+        mydata:IN_CORE mydata:intPlaceholder true .
+        <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
+    }
+}',
+
+"ints to to bool"=
+  'insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+        ?s ?p ?boolean
+    }
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?p mydata:intPlaceholder true .
+        ?s ?p ?int .
+        filter(datatype(?int)!=xsd:boolean)
+        bind(if(?int = "1", true, false) as ?boolean)
+    }
+}',
+"delete ints" =
+  'delete {
+    ?s ?p ?int .
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?p mydata:intPlaceholder true .
+        ?s ?p ?int .
+        filter(datatype(?int)!=xsd:boolean)
+    }
+}',
+"migrate bools" = 'insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s ?p ?boolean
+    }
 }
-')
-# ,
-#
-# "NLM ICD9CM to SNOMED mapping... tag booleans" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# insert data {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
-#         mydata:IS_NEC mydata:intPlaceholder true .
-#         mydata:IS_1-1MAP mydata:intPlaceholder true .
-#         mydata:IN_CORE mydata:intPlaceholder true .
-#         <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
-#     }
-# }',
-#
-# "ints to to bool"=
-# 'PREFIX mydata: <http://example.com/resource/>
-# insert {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
-#         ?s ?p ?boolean
-#     }
-# } where {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         ?p mydata:intPlaceholder true .
-#         ?s ?p ?int .
-#         bind(if(?int = "1", true, false) as ?boolean)
-#     }
-# }',
-# "delete ints" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# delete {
-#     ?s ?p ?int .
-# } where {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         ?p mydata:intPlaceholder true .
-#         ?s ?p ?int .
-#     }
-# }',
-# "migrate bools" = 'insert {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         ?s ?p ?boolean
-#     }
-# }
-# where {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
-#         ?s ?p ?boolean
-#     }
-# }',
-# "clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
-#
-# "materialize ICD9CM to snomed mappings" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# insert {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?snomed
-#     }
-# } where {
-#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-#         ?s mydata:ICD_CODE	?ICD_CODE	;
-#            mydata:SNOMED_CID ?SNOMED_CID .
-#         bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT/", ?SNOMED_CID)) as ?snomed)
-#         bind(uri(concat("http://purl.bioontology.org/ontology/ICD9CM/", ?ICD_CODE)) as ?icd)
-#     }
-#     graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
-#         ?snomed a owl:Class
-#     }
-#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-#         ?icd a owl:Class
-#     }
-# }'
-# ,
-#
-# "isolation of ICD10 siblings" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# insert  {
-#     graph <http://example.com/resource/ICD10CM_siblings> {
-#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
-#     }
-# }
-# where {
-#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
-#     }
-# }',
-# "deletion of ICD10 siblings" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# delete  {
-#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
-#     }
-# }
-# where {
-#     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
-#     }
-# }'
-# ,
-# "isolation of ICD9 siblings" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# insert  {
-#     graph <http://example.com/resource/ICD9CM_siblings> {
-#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
-#     }
-# }
-# where {
-#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
-#     }
-# }',
-# "deletion of ICD9 siblings" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# delete  {
-#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
-#     }
-# }
-# where {
-#     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-#         ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
-#     }
-# }',
-# "defined in" =
-# 'PREFIX mydata: <http://example.com/resource/>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# insert {
-#     graph <http://example.com/resource/definedIn> {
-#         ?s <http://example.com/resource/definedIn> ?g
-#     }
-# } where {
-#     graph ?g {
-#         ?s a owl:Class
-#     }
-# }',
-# # does this miss equivalentCLass axioms and more complex subClassOf axioms (ie with intersections)?
-# "someMaterializedMondoAxioms" = '
-# PREFIX mydata: <http://example.com/resource/>
-# PREFIX obo: <http://purl.obolibrary.org/obo/>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# insert {
-#         graph mydata:materializedMondoAxioms {
-#     ?term ?op ?valSource
-#     }
-# }
-# where {
-#     graph obo:mondo.owl {
-#         ?term rdfs:subClassOf* ?restr ;
-#                              rdfs:label ?termlab .
-#         ?restr a owl:Restriction ;
-#                owl:onProperty ?op ;
-#                owl:someValuesFrom ?valSource .
-#         ?op rdfs:label ?opl .
-#         ?valSource rdfs:label ?vsl .
-#         filter(isuri( ?term ))
-#     }
-# }
-# #limit 99',
-# "ICD9DiseaseInjuryTransitiveSubClasses" = '
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-# PREFIX mydata: <http://example.com/resource/>
-#   insert {
-#     graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
-#       ?sub rdfs:subClassOf ?s .
-#     }
-#   }
-# where {
-#   graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-#     # + or * ?
-#     ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
-#     ?sub rdfs:subClassOf* ?s .
-#   }
-# }',
-# "ICD10TransitiveSubClasses" = '
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-# PREFIX mydata: <http://example.com/resource/>
-#   insert {
-#     graph mydata:ICD10TransitiveSubClasses {
-#       ?sub rdfs:subClassOf ?s .
-#     }
-#   }
-# where {
-#   graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-#     # + or * ?
-#     ?s rdfs:subClassOf+ owl:Thing .
-#     ?sub rdfs:subClassOf* ?s .
-#   }
-# }',
-# "SnomedDiseaseTransitiveSubClasses" = '
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-# PREFIX mydata: <http://example.com/resource/>
-#   insert {
-#     graph mydata:SnomedDiseaseTransitiveSubClasses {
-#       ?sub rdfs:subClassOf ?s .
-#     }
-#   }
-# where {
-#   graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
-#     # + or * ?
-#     ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT/64572001> .
-#     ?sub rdfs:subClassOf* ?s .
-#   }
-# }'
-# ,
-# "filteredMondoTransitiveSubClasses" = '
-# PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
-# PREFIX mydata: <http://example.com/resource/>
-# PREFIX obo: <http://purl.obolibrary.org/obo/>
-# PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-# PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-# PREFIX owl: <http://www.w3.org/2002/07/owl#>
-# insert {
-#     graph mydata:filteredMondoTransitiveSubClasses {
-#         ?mondoSub rdfs:subClassOf ?mondo .
-#     }
-# }
-# where {
-#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
-#         ?mondoSub rdfs:subClassOf* ?mondo .
-#     }
-#     # minus {
-#     #     graph <http://example.com/resource/materializedMondoAxioms> {
-#     #         ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
-#     #     }
-#     # }
-# }'
-# )
+where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+        ?s ?p ?boolean
+    }
+}',
+"clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
+
+"materialize ICD9CM to snomed mappings" =
+  'insert {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?snomed
+    }
+} where {
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?s mydata:ICD_CODE	?ICD_CODE	;
+           mydata:SNOMED_CID ?SNOMED_CID .
+        bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT_US/", ?SNOMED_CID)) as ?snomed)
+        bind(uri(concat("http://purl.bioontology.org/ontology/ICD9CM/", ?ICD_CODE)) as ?icd)
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+        ?snomed a owl:Class
+    }
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?icd a owl:Class
+    }
+}'
+,
+
+"isolation of ICD10 siblings" =
+  'insert  {
+    graph <http://example.com/resource/ICD10CM_siblings> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}',
+"deletion of ICD10 siblings" =
+  'delete  {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD10CM/SIB> ?o
+    }
+}'
+,
+"isolation of ICD9 siblings" =
+  'insert  {
+    graph <http://example.com/resource/ICD9CM_siblings> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}',
+"deletion of ICD9 siblings" =
+  'delete  {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}
+where {
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?s <http://purl.bioontology.org/ontology/ICD9CM/SIB> ?o
+    }
+}',
+"defined in" =
+  'insert {
+    graph <http://example.com/resource/definedIn> {
+        ?s <http://example.com/resource/definedIn> ?g
+    }
+} where {
+    graph ?g {
+        ?s a owl:Class
+    }
+}',
+# does this miss equivalentCLass axioms and more complex subClassOf axioms (ie with intersections)?
+"someMaterializedMondoAxioms" = 'insert {
+    graph mydata:materializedSimpleMondoAxioms {
+        ?term ?op ?valSource
+    }
+}
+where {
+    graph obo:mondo.owl {
+        ?term rdfs:subClassOf* ?restr .
+        # ?term rdfs:label ?termlab .
+        ?restr a owl:Restriction ;
+               owl:onProperty ?op ;
+               owl:someValuesFrom ?valSource .
+        # ?op rdfs:label ?opl .
+        # ?valSource rdfs:label ?vsl .
+        filter(isuri( ?term ))
+    }
+}
+#limit 99',
+"ICD9DiseaseInjuryTransitiveSubClasses" = 'insert {
+    graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
+      ?sub rdfs:subClassOf ?s .
+    }
+  }
+where {
+  graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+    # + or * ?
+    ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/ICD9CM/001-999.99> .
+    ?sub rdfs:subClassOf* ?s .
+  }
+}',
+"ICD10TransitiveSubClasses" = 'insert {
+    graph mydata:ICD10TransitiveSubClasses {
+      ?sub rdfs:subClassOf ?s .
+    }
+  }
+where {
+  graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+    # + or * ?
+    ?s rdfs:subClassOf+ owl:Thing .
+    ?sub rdfs:subClassOf* ?s .
+  }
+}',
+"SnomedDiseaseTransitiveSubClasses" = 'insert {
+    graph mydata:SnomedDiseaseTransitiveSubClasses {
+      ?sub rdfs:subClassOf ?s .
+    }
+  }
+where {
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+    # + or * ?
+    ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT_US/64572001> .
+    ?sub rdfs:subClassOf* ?s .
+  }
+}'
+,
+"MondoTransitiveSubClasses" = 'insert {
+    graph mydata:MondoTransitiveSubClasses {
+        ?mondoSub rdfs:subClassOf ?mondo .
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?mondoSub rdfs:subClassOf* ?mondo .
+    }
+    # minus {
+    #     graph <http://example.com/resource/materializedMondoAxioms> {
+    #         ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
+    #     }
+    # }
+}'
+)
 
 update.names <- names(update.list)
 
@@ -1095,8 +1045,9 @@ update.names <- names(update.list)
 # >
 
 # rewrite statements with consistent orientation
-#   and with URIs consistent with linked knowledgebases
-# also shallow materialization, but NOT transitive materializations
+#   and with URIs matching linked knowledgebases
+# also transitive materialization over knowledgebases (prior to path materializastion)
+
 update.outer.result <-
   lapply(update.names, function(current.name) {
     current.update <- update.list[[current.name]]
@@ -1121,37 +1072,39 @@ update.outer.result <-
 # http://example.com/resource/mondoOriginals
 # http://example.com/resource/undefinedRewrites
 
+if(delete.isolated.flag) {
+  post.res <- POST(
+    update.endpoint,
+    body = list(update = "clear graph <http://example.com/resource/ICD10CM_siblings>"),
+    saved.authentication
+  )
+  
+  
+  post.res <- POST(
+    update.endpoint,
+    body = list(update = "clear graph <http://example.com/resource/ICD9CM_siblings>"),
+    saved.authentication
+  )
+  
+  post.res <- POST(
+    update.endpoint,
+    body = list(update = "clear graph <http://example.com/resource/icd9range>"),
+    saved.authentication
+  )
+  
+  post.res <- POST(
+    update.endpoint,
+    body = list(update = "clear graph <http://example.com/resource/mondoOriginals>"),
+    saved.authentication
+  )
+  
+  post.res <- POST(
+    update.endpoint,
+    body = list(update = "clear graph <http://example.com/resource/undefinedRewrites>"),
+    saved.authentication
+  )
+}
 
-post.res <- POST(
-  update.endpoint,
-  body = list(update = "clear graph <http://example.com/resource/ICD10CM_siblings>"),
-  saved.authentication
-)
-
-
-post.res <- POST(
-  update.endpoint,
-  body = list(update = "clear graph <http://example.com/resource/ICD9CM_siblings>"),
-  saved.authentication
-)
-
-post.res <- POST(
-  update.endpoint,
-  body = list(update = "clear graph <http://example.com/resource/icd9range>"),
-  saved.authentication
-)
-
-post.res <- POST(
-  update.endpoint,
-  body = list(update = "clear graph <http://example.com/resource/mondoOriginals>"),
-  saved.authentication
-)
-
-post.res <- POST(
-  update.endpoint,
-  body = list(update = "clear graph <http://example.com/resource/undefinedRewrites>"),
-  saved.authentication
-)
 
 # deletion justifications:
 # siblings (predicate = http://purl.bioontology.org/ontology/ICD10CM/SIB) are accessible as children of the same
@@ -1168,7 +1121,7 @@ post.res <- POST(
 #   it could be a CUI that just isn't present in ICD-X or snomed
 #   http://example.com/cui/C0001139 owl:equivalentClass obo:MONDO_0006635
 #   where the contexts for C0001139 are medra and mesh and ndfrt
-#   obo:MONDO_0037872 owl:equivalentClass http://purl.bioontology.org/ontology/SNOMEDCT/26484003 (26484003 is retired)
+#   obo:MONDO_0037872 owl:equivalentClass http://purl.bioontology.org/ontology/SNOMEDCT_US/26484003 (26484003 is retired)
 #   or it could be a mangled ICD code
 #   obo:MONDO_0006015 mydata:mdbxr http://purl.bioontology.org/ontology/ICD10CM/A39.1+
 
@@ -1186,4 +1139,3 @@ post.res <- POST(
 
 
 ###   ###   ###
-
