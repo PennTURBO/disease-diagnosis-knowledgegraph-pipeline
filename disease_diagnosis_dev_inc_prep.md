@@ -1523,3 +1523,7 @@ where {
     }
 }
 ```
+
+### Real-time MonDO axiom filtering example
+
+----
