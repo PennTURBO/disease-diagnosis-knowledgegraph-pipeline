@@ -1464,9 +1464,9 @@ where {
 
 > Added 1044847 statements. Update took 1m 31s, minutes ago.
 
-## 22 paths in repo `dd_include_icd_transitivity` on http://turbo-prd-db01.pmacs.upenn.edu:7200/
+## 22 paths in repo `dd_include_icd_transitivity` 
 
-_Will add paths from `Hayden_diseaseToDiagnosis` soon_
+_on http://turbo-prd-db01.pmacs.upenn.edu:7200/ _
 
 ```R
  [1] "mydata:m-dbxr-i9"                        "mydata:m-dbxr-i10"                       "mydata:m-dbxr-snomed-shared_cui-i9"     
@@ -1478,6 +1478,28 @@ _Will add paths from `Hayden_diseaseToDiagnosis` soon_
 [19] "mydata:m-cMatch-shared_cui-i9"           "mydata:m-dbxr-shared_cui-i10"            "mydata:m-exMatch-shared_cui-i10"        
 [22] "mydata:m-cMatch-shared_cui-i10"          "mydata:i9-shared_cui-eqClass-m"          "mydata:i10-shared_cui-eqClass-m" 
 ```
+
+## paths from `Hayden_diseaseToDiagnosis`
+
+1. http://graphBuilder.org/mondoToIcdMappings
+1. http://graphBuilder.org/mondoToIcdMappingsFullSemantics
+1. owl:equivalentClass_snomed_with_icd9_map
+1. oboInOwl:hasDbXref_snomed_with_icd9_map
+1. skos:exactMatch_snomed_with_icd9_map
+1. owl:equivalentClass_snomed_shared_cui
+1. oboInOwl:hasDbXref_snomed_shared_cui
+1. skos:exactMatch_snomed_shared_cui
+1. oboInOwl:hasDbXref_cui
+1. skos:exactMatch_cui
+1. oboInOwl:hasDbXref_icd9_without_range_subclasses
+1. owl:cui_equivalentClass
+1. owl:icd9_equivalentClass
+1. oboInOwl:hasDbXref_icd10
+1. owl:icd10_equivalentClass
+1. skos:closeMatch_snomed_with_icd9_map
+1. skos:closeMatch_snomed_shared_cui
+1. skos:closeMatch_cui
+
 
 ## Queries possible with no additional materialization
 
