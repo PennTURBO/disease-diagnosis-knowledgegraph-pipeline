@@ -1464,9 +1464,9 @@ where {
 
 > Added 1044847 statements. Update took 1m 31s, minutes ago.
 
-## 22 paths in 
+## 22 paths in repo `dd_include_icd_transitivity` on http://turbo-prd-db01.pmacs.upenn.edu:7200/
 
-_Will add paths from 
+_Will add paths from `Hayden_diseaseToDiagnosis` soon_
 
 ```R
  [1] "mydata:m-dbxr-i9"                        "mydata:m-dbxr-i10"                       "mydata:m-dbxr-snomed-shared_cui-i9"     
