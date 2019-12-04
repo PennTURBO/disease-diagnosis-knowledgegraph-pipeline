@@ -1464,7 +1464,7 @@ where {
 
 > Added 1044847 statements. Update took 1m 31s, minutes ago.
 
-## 22 paths in repo `dd_include_icd_transitivity` 
+## 24 paths in repo `dd_include_icd_transitivity` 
 
 _on http://turbo-prd-db01.pmacs.upenn.edu:7200/ _
 
