@@ -1666,5 +1666,57 @@ where {
 }
 ```
 
-### Last path coming up soon: MonDO to SNOMED to NLMs mappings to ICD9 
+### Last path family: MonDO to SNOMED to NLMs mappings to ICD9 
+
+This corresonpds to paths
+
+1. mydata:m-dbxr-snomed-NLM_mappings-i9 
+1. mydata:m-eqClass-snomed-NLM_mappings-i9 
+1. mydata:m-exMatch-snomed-NLM_mappings-i9 
+1. mydata:m-cMatch-snomed-NLM_mappings-i9
+
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+select 
+distinct 
+?m ?rewriteGraph ?assertedPredicate ?icdVer ?icdCode ("mondo->snomed->NLM mappings->icd9" as ?pathFamily)
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?snomed
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+        ?snomed a owl:Class ;
+                skos:notation ?CID .
+    }
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        # this grpah has lots of filterable properties like
+        # mydata:AVG_USAGE, mydata:CORE_USAGE, mydata:IN_CORE, mydata:IS_1-1MAP
+        ?icd9cm_to_snomedct mydata:SNOMED_CID ?CID ;
+                            mydata:ICD_CODE ?icdCode .
+    }
+    {
+#        {
+#            graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#                ?icd skos:notation ?icdCode .
+#            }
+#            bind(10 as ?icdVer)
+#        }
+#        union
+        {
+            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icd skos:notation ?icdCode
+            }
+            bind(9 as ?icdVer)
+        } 
+    }
+}
+```
 
