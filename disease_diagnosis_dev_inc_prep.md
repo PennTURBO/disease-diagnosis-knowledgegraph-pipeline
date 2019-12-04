@@ -1612,6 +1612,18 @@ where {
 
 ### MonDO's paths to ICD10 codes via SNOMED and a CUI
 
+With the addition of a slightly modified ICD9 query, this corresonpds to paths
+
+1. mydata:m-dbxr-snomed-shared_cui-i9 
+1. mydata:m-eqClass-snomed-shared_cui-i9 
+1. mydata:m-exMatch-snomed-shared_cui-i9 
+1. mydata:m-cMatch-snomed-shared_cui-i9 
+1. mydata:m-dbxr-snomed-shared_cui-i10 
+1. mydata:m-eqClass-snomed-shared_cui-i10 
+1. mydata:m-exMatch-snomed-shared_cui-i10 
+1. ydata:m-cMatch-snomed-shared_cui-i10
+
+
 ```SPARQL
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
