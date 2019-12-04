@@ -1501,7 +1501,9 @@ _on http://turbo-prd-db01.pmacs.upenn.edu:7200/ _
 1. skos:closeMatch_cui
 
 
-## Queries possible with no additional materialization
+## There are now separate queries for separate path families
+
+These queries are possible with no additional materialization and can be concatenated row-wise
 
 ### MonDO's direct paths to ICD codes
 
@@ -1607,6 +1609,8 @@ order by ?m
 
 ### MonDO's paths to ICD10 codes via SNOMED and a CUI
 
+All of the path family queries can have MonDO or ICD transitivity bolted on as a module. However, the queries that traverse SNOMED will have transitive and non-transitive alternative forms. The non-trasivite choice is shown here now, and the transitive choice will be added soon. A query session would use **either** transitive **or** non-transitive, and that would become another attribute of the paths.
+
 This corresonpds to paths
 
 1. mydata:m-dbxr-snomed-shared_cui-i9 
@@ -1661,4 +1665,6 @@ where {
     }
 }
 ```
+
+### Last path coming up soon: MonDO to SNOMED to NLMs mappings to ICD9 
 
