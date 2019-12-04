@@ -1607,7 +1607,7 @@ order by ?m
 
 ### MonDO's paths to ICD10 codes via SNOMED and a CUI
 
-With the addition of a slightly modified ICD9 query, this corresonpds to paths
+This corresonpds to paths
 
 1. mydata:m-dbxr-snomed-shared_cui-i9 
 1. mydata:m-eqClass-snomed-shared_cui-i9 
@@ -1625,7 +1625,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX mydata: <http://example.com/resource/>
 select 
-distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->snomed->CUI->icd10" as ?pathFamily)
+# enriched for icd10
+# there's a seperate path family for snomed -> icd9
+distinct 
+#?icdVer
+?m ?rewriteGraph ?assertedPredicate ?icdVer ?icdCode ("mondo->snomed->CUI->icd" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
@@ -1638,13 +1642,22 @@ where {
     }
     graph <http://example.com/resource/materializedCui> {
         ?snomed mydata:materializedCui ?cui .
-        ?i10 mydata:materializedCui ?cui .
+        ?icd mydata:materializedCui ?cui .
     }
-#    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
-#        ?i10 rdfs:subClassOf ?anythingIcd10  .
-#    }
-    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-        ?i10 skos:notation ?i10code
+    {
+        {
+            graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+                ?icd skos:notation ?icdCode .
+            }
+            bind(10 as ?icdVer)
+        }
+        union
+        {
+            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icd skos:notation ?icdCode
+            }
+            bind(9 as ?icdVer)
+        } 
     }
 }
 ```
