@@ -1534,9 +1534,16 @@ where {
 
 Timing: The results from this query (raw or **pre-distinct-ified**) can be **downloaded from AWS** to Penn in roughly 5 seconds.
 
+This covers paths mydata:m-dbxr-i10 and mydata:i10-eqClass-m
+
 ### MonDO's direct paths to ICD9 codes
 
 All of the remarks about the ICD10 mapping above hold true here, too.
+
+This corresponds to paths 
+1. mydata:m-dbxr-i9
+1. mydata:i9-eqClass-m
+
 
 ```SPARQL
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -1564,3 +1571,43 @@ where {
 ### Real-time MonDO axiom filtering example
 
 ----
+
+### MonDO's paths to ICD10 codes via a CUI
+
+If you include the minor rewrite for ICD9, then this corresponds to paths 
+1. mydata:m-dbxr-shared_cui-i9 
+1. mydata:m-exMatch-shared_cui-i9 
+1. mydata:m-cMatch-shared_cui-i9 
+1. mydata:m-dbxr-shared_cui-i10 
+1. mydata:m-exMatch-shared_cui-i10 
+1. mydata:m-cMatch-shared_cui-i10 
+1. mydata:i9-shared_cui-eqClass-m 
+1. mydata:i10-shared_cui-eqClass-m
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+select 
+distinct ?m ?rewriteGraph ?assertedPredicate ?i10code
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?cui
+    }
+    graph <http://example.com/resource/materializedCui> {
+        ?cui a mydata:materializedCui .
+        ?i10 mydata:materializedCui ?cui .
+    }
+    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
+        ?i10 rdfs:subClassOf ?anythingIcd10  .
+    }
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?i10 skos:notation ?i10code
+    }
+}
+```
+
