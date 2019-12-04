@@ -1515,7 +1515,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 select 
-distinct ?m ?rewriteGraph ?assertedPredicate ?i10code
+distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->CUI->icd10" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
@@ -1523,9 +1523,9 @@ where {
     graph ?rewriteGraph {
         ?m ?assertedPredicate ?i10
     }
-    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
-        ?i10 rdfs:subClassOf ?anythingIcd10 .
-    }
+#    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
+#        ?i10 rdfs:subClassOf ?anythingIcd10 .
+#    }
     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
         ?i10 skos:notation ?i10code
     }
@@ -1550,8 +1550,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 select 
-distinct 
-?m ?rewriteGraph ?assertedPredicate ?i10code
+distinct ?m ?rewriteGraph ?assertedPredicate (?i9code as ?icdCode) ("mondo->CUI->icd9" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
@@ -1559,9 +1558,9 @@ where {
     graph ?rewriteGraph {
         ?m ?assertedPredicate ?i9
     }
-    graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
-        ?i9 rdfs:subClassOf ?anythingIcd9 .
-    }
+#    graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
+#        ?i9 rdfs:subClassOf ?anythingIcd9 .
+#    }
     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
         ?i9 skos:notation ?i9code
     }
@@ -1590,7 +1589,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX mydata: <http://example.com/resource/>
 select 
-distinct ?m ?rewriteGraph ?assertedPredicate ?i10code
+distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->CUI->icd10" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
@@ -1605,6 +1604,38 @@ where {
     graph <http://example.com/resource/ICD10TransitiveSubClasses> {
         ?i10 rdfs:subClassOf ?anythingIcd10  .
     }
+    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+        ?i10 skos:notation ?i10code
+    }
+}
+```
+
+### MonDO's paths to ICD10 codes via SNOMED and a CUI
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+select 
+distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->snomed->CUI->icd10" as ?pathFamily)
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?snomed
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+        ?snomed a owl:Class
+    }
+    graph <http://example.com/resource/materializedCui> {
+        ?snomed mydata:materializedCui ?cui .
+        ?i10 mydata:materializedCui ?cui .
+    }
+#    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
+#        ?i10 rdfs:subClassOf ?anythingIcd10  .
+#    }
     graph <http://purl.bioontology.org/ontology/ICD10CM/> {
         ?i10 skos:notation ?i10code
     }
