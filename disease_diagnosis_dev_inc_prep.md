@@ -1503,7 +1503,7 @@ _on http://turbo-prd-db01.pmacs.upenn.edu:7200/ _
 
 ## Queries possible with no additional materialization
 
-### MonDO's direct paths to ICD10 codes
+### MonDO's direct paths to ICD codes
 
 In this case the _detailed_ paths would be the Cartesian product of the two `?rewriteGraph`s (which capture the orientation of MonDO's assertion) and the  `?assertedPredicate`s, which appear to be limited to two
 
@@ -1515,65 +1515,50 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 select 
-distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->CUI->icd10" as ?pathFamily)
+distinct ?m ?rewriteGraph ?assertedPredicate ?icdVer ?icdCode ("mondo->icd" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
     }
     graph ?rewriteGraph {
-        ?m ?assertedPredicate ?i10
+        ?m ?assertedPredicate ?icd
     }
-#    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
-#        ?i10 rdfs:subClassOf ?anythingIcd10 .
-#    }
-    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-        ?i10 skos:notation ?i10code
+    {
+        {
+            graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+                ?icd skos:notation ?icdCode .
+            }
+            bind(10 as ?icdVer)
+        }
+        union
+        {
+            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icd skos:notation ?icdCode
+            }
+            bind(9 as ?icdVer)
+        } 
     }
 }
+order by ?m
 ```
 
-Timing: The results from this query (raw or **pre-distinct-ified**) can be **downloaded from AWS** to Penn in roughly 5 seconds.
+Timing: The sorted results (raw or **pre-distinct-ified**) from this query across all of MonDO and all of ICD9/10 codes can be **downloaded from AWS** to Penn in roughly 10 seconds. Unsorted would be faster.
 
-This covers paths mydata:m-dbxr-i10 and mydata:i10-eqClass-m
-
-### MonDO's direct paths to ICD9 codes
-
-All of the remarks about the ICD10 mapping above hold true here, too.
-
-This corresponds to paths 
+This covers paths
+1. mydata:m-dbxr-i10
+1. mydata:i10-eqClass-m
 1. mydata:m-dbxr-i9
 1. mydata:i9-eqClass-m
 
-
-```SPARQL
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-select 
-distinct ?m ?rewriteGraph ?assertedPredicate (?i9code as ?icdCode) ("mondo->CUI->icd9" as ?pathFamily)
-where {
-    graph <http://example.com/resource/MondoTransitiveSubClasses> {
-        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
-    }
-    graph ?rewriteGraph {
-        ?m ?assertedPredicate ?i9
-    }
-#    graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
-#        ?i9 rdfs:subClassOf ?anythingIcd9 .
-#    }
-    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-        ?i9 skos:notation ?i9code
-    }
-}
-```
+----
 
 ### Real-time MonDO axiom filtering example
 
 ----
 
-### MonDO's paths to ICD10 codes via a CUI
+### MonDO's paths to ICD codes via a CUI
 
-If you include the minor rewrite for ICD9, then this corresponds to paths 
+This corresponds to paths 
 1. mydata:m-dbxr-shared_cui-i9 
 1. mydata:m-exMatch-shared_cui-i9 
 1. mydata:m-cMatch-shared_cui-i9 
@@ -1589,7 +1574,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX mydata: <http://example.com/resource/>
 select 
-distinct ?m ?rewriteGraph ?assertedPredicate (?i10code as ?icdCode) ("mondo->CUI->icd10" as ?pathFamily)
+distinct ?m ?rewriteGraph ?assertedPredicate ?icdVer ?icdCode ("mondo->CUI->icd" as ?pathFamily)
 where {
     graph <http://example.com/resource/MondoTransitiveSubClasses> {
         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
@@ -1599,15 +1584,25 @@ where {
     }
     graph <http://example.com/resource/materializedCui> {
         ?cui a mydata:materializedCui .
-        ?i10 mydata:materializedCui ?cui .
+        ?icd mydata:materializedCui ?cui .
     }
-    graph <http://example.com/resource/ICD10TransitiveSubClasses> {
-        ?i10 rdfs:subClassOf ?anythingIcd10  .
-    }
-    graph <http://purl.bioontology.org/ontology/ICD10CM/> {
-        ?i10 skos:notation ?i10code
+    {
+        {
+            graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+                ?icd skos:notation ?icdCode .
+            }
+            bind(10 as ?icdVer)
+        }
+        union
+        {
+            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icd skos:notation ?icdCode
+            }
+            bind(9 as ?icdVer)
+        } 
     }
 }
+order by ?m
 ```
 
 ### MonDO's paths to ICD10 codes via SNOMED and a CUI
