@@ -1464,6 +1464,21 @@ where {
 
 > Added 1044847 statements. Update took 1m 31s, minutes ago.
 
+## 22 paths in 
+
+_Will add paths from 
+
+```R
+ [1] "mydata:m-dbxr-i9"                        "mydata:m-dbxr-i10"                       "mydata:m-dbxr-snomed-shared_cui-i9"     
+ [4] "mydata:m-eqClass-snomed-shared_cui-i9"   "mydata:m-exMatch-snomed-shared_cui-i9"   "mydata:m-cMatch-snomed-shared_cui-i9"   
+ [7] "mydata:m-dbxr-snomed-shared_cui-i10"     "mydata:m-eqClass-snomed-shared_cui-i10"  "mydata:m-exMatch-snomed-shared_cui-i10" 
+[10] "mydata:m-cMatch-snomed-shared_cui-i10"   "mydata:m-dbxr-snomed-NLM_mappings-i9"    "mydata:m-eqClass-snomed-NLM_mappings-i9"
+[13] "mydata:m-exMatch-snomed-NLM_mappings-i9" "mydata:m-cMatch-snomed-NLM_mappings-i9"  "mydata:i9-eqClass-m"                    
+[16] "mydata:i10-eqClass-m"                    "mydata:m-dbxr-shared_cui-i9"             "mydata:m-exMatch-shared_cui-i9"         
+[19] "mydata:m-cMatch-shared_cui-i9"           "mydata:m-dbxr-shared_cui-i10"            "mydata:m-exMatch-shared_cui-i10"        
+[22] "mydata:m-cMatch-shared_cui-i10"          "mydata:i9-shared_cui-eqClass-m"          "mydata:i10-shared_cui-eqClass-m" 
+```
+
 ## Queries possible with no additional materialization
 
 ### MonDO's direct paths to ICD10 codes
