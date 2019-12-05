@@ -1666,6 +1666,54 @@ where {
 }
 ```
 
+#### MonDO's paths to ICD10 codes via SNOMED and a CUI as above, with transitivity over SNOMED sublcasses
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mydata: <http://example.com/resource/>
+select 
+# enriched for icd10
+# there's a seperate path family for snomed -> icd9
+distinct 
+#?icdVer
+?m ?rewriteGraph ?assertedPredicate ?icdVer ?icdCode ("mondo->snomed->CUI->icd" as ?pathFamily)
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    }
+    graph ?rewriteGraph {
+        ?m ?assertedPredicate ?presnomed
+    }
+    graph <http://example.com/resource/SnomedDiseaseTransitiveSubClasses> {
+        ?snomed rdfs:subClassOf ?presnomed
+    }
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+        ?snomed a owl:Class
+    }
+    graph <http://example.com/resource/materializedCui> {
+        ?snomed mydata:materializedCui ?cui .
+        ?icd mydata:materializedCui ?cui .
+    }
+    {
+        {
+            graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+                ?icd skos:notation ?icdCode .
+            }
+            bind(10 as ?icdVer)
+        }
+        union
+        {
+            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icd skos:notation ?icdCode
+            }
+            bind(9 as ?icdVer)
+        } 
+    }
+}
+```
+
 ### Last path family: MonDO to SNOMED to NLMs mappings to ICD9 
 
 This corresonpds to paths
