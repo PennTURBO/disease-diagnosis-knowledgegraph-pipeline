@@ -181,8 +181,170 @@ the.chunks <-
 ###   ###   ###
 
 
+# query.templates <- list(
+#   "mondo->icd" = 'select distinct ?mid ?ml
+#   ("mondo->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+#   (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+# where {
+#     values ?icdCode { ${current.assembled} }
+#     graph <http://example.com/resource/MondoTransitiveSubClasses> {
+#         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+#     }
+#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#         ?m rdfs:label ?ml ;
+#            <http://www.geneontology.org/formats/oboInOwl#id> ?mid
+#     }
+#     graph ?rewriteGraph {
+#         ?m ?assertedPredicate ?icd
+#     }
+#     graph <http://example.com/resource/AssertionOrientations> {
+#         ?rewriteGraph rdfs:label ?assertionOrientation .
+#     }
+#     {
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl  .
+#             }
+#             bind(10 as ?icdVer)
+#         }
+#         union
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl  .
+#             }
+#             bind(9 as ?icdVer)
+#         }
+#     }
+# }',
+#   "mondo->CUI->icd" = 'select distinct ?mid ?ml
+#   ("mondo->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+#   (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+# where {
+#     values ?icdCode { ${current.assembled} }
+#     graph <http://example.com/resource/MondoTransitiveSubClasses> {
+#         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+#     }
+#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#         ?m rdfs:label ?ml ;
+#            <http://www.geneontology.org/formats/oboInOwl#id> ?mid
+#     }
+#     graph ?rewriteGraph {
+#         ?m ?assertedPredicate ?cui
+#     }
+#     graph <http://example.com/resource/AssertionOrientations> {
+#         ?rewriteGraph rdfs:label ?assertionOrientation .
+#     }
+#     graph <http://example.com/resource/materializedCui> {
+#         ?cui a mydata:materializedCui .
+#         ?icd mydata:materializedCui ?cui .
+#     }
+#     {
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl  .
+#             }
+#             bind(10 as ?icdVer)
+#         }
+#         union
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl  .
+#             }
+#             bind(9 as ?icdVer)
+#         }
+#     }
+# }',
+#   "mondo->snomed->CUI->icd" = 'select distinct ?mid ?ml
+#   ("mondo->snomed->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+#   (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+# where {
+#     values ?icdCode { ${current.assembled} }
+#     {
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD10CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl .
+#             }
+#             bind(10 as ?icdVer)
+#         }
+#         union
+#         {
+#             graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl .
+#             }
+#             bind(9 as ?icdVer)
+#         }
+#     }
+#     graph <http://example.com/resource/materializedCui> {
+#         ?icd mydata:materializedCui ?cui .
+#         ?snomed mydata:materializedCui ?cui .
+#     }
+#     graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+#         ?snomed a owl:Class
+#     }
+#     graph ?rewriteGraph {
+#         ?m ?assertedPredicate ?snomed
+#     }
+#     graph <http://example.com/resource/AssertionOrientations> {
+#         ?rewriteGraph rdfs:label ?assertionOrientation .
+#     }
+#     graph <http://example.com/resource/MondoTransitiveSubClasses> {
+#         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+#     }
+#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#         ?m rdfs:label ?ml ;
+#            <http://www.geneontology.org/formats/oboInOwl#id> ?mid
+#     }
+# }',
+#   "mondo->snomed->NLM mappings->icd9" = 'select distinct ?mid ?ml
+#   ("mondo->snomed->NLM mappings->icd9" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+#   (concat("ICD", str(?icdVer), "CM:", ?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+# where {
+#     values ?icdCode { ${current.assembled} }
+#   {
+#             graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+#                 ?icd skos:notation ?icdCode ;
+#                      skos:prefLabel ?ipl  .
+#             }
+#             bind(9 as ?icdVer)
+#   }
+#       graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         # this grpah has lots of filterable properties like
+#         # mydata:AVG_USAGE, mydata:CORE_USAGE, mydata:IN_CORE, mydata:IS_1-1MAP
+#         ?icd9cm_to_snomedct mydata:SNOMED_CID ?CID ;
+#                             mydata:ICD_CODE ?icdCode .
+#       }
+#         graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+#         ?snomed a owl:Class ;
+#                 skos:notation ?CID .
+#         }
+#         graph ?rewriteGraph {
+#         ?m ?assertedPredicate ?snomed
+#         }
+#     graph <http://example.com/resource/AssertionOrientations> {
+#         ?rewriteGraph rdfs:label ?assertionOrientation .
+#     }
+#
+#     graph <http://example.com/resource/MondoTransitiveSubClasses> {
+#         ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+#     }
+#     graph <http://purl.obolibrary.org/obo/mondo.owl> {
+#         ?m rdfs:label ?ml ;
+#            <http://www.geneontology.org/formats/oboInOwl#id> ?mid
+#     }
+# }'
+# )
+
+### updated, snomed transivitive
+
+
 query.templates <- list(
-  "mondo->icd" = 'select distinct ?mid ?ml
+  "mondo->icd" = 'select distinct ?mid ?ml ?depth
   ("mondo->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
   (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
@@ -216,6 +378,9 @@ where {
             }
             bind(9 as ?icdVer)
         }
+    }
+    graph mydata:mondoHopCounts {
+        ?m mydata:hopCount  ?depth
     }
 }',
   "mondo->CUI->icd" = 'select distinct ?mid ?ml
@@ -258,9 +423,11 @@ where {
         }
     }
 }',
-  "mondo->snomed->CUI->icd" = 'select distinct ?mid ?ml
-  ("mondo->snomed->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-  (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+  "mondo->snomed->CUI->icd" = 'select
+distinct
+?mid ?ml
+("mondo->snomed,transitive->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+(concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
     {
@@ -269,7 +436,7 @@ where {
                 ?icd skos:notation ?icdCode ;
                      skos:prefLabel ?ipl .
             }
-            bind(10 as ?icdVer)
+            bind("ICD10CM:" as ?icdVer)
         }
         union
         {
@@ -277,68 +444,80 @@ where {
                 ?icd skos:notation ?icdCode ;
                      skos:prefLabel ?ipl .
             }
-            bind(9 as ?icdVer)
+            bind("ICD9CM:" as ?icdVer)
         }
     }
     graph <http://example.com/resource/materializedCui> {
         ?icd mydata:materializedCui ?cui .
         ?snomed mydata:materializedCui ?cui .
     }
-    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
-        ?snomed a owl:Class
+    graph <http://example.com/resource/SnomedDiseaseTransitiveSubClasses> {
+        ?s rdfs:subClassOf ?sParent .
     }
     graph ?rewriteGraph {
         ?m ?assertedPredicate ?snomed
     }
-    graph <http://example.com/resource/AssertionOrientations> {
-        ?rewriteGraph rdfs:label ?assertionOrientation .
-    }
-    graph <http://example.com/resource/MondoTransitiveSubClasses> {
-        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_subject> {
+                ?m ?assertedPredicate ?sParent .
+            }
+            bind("forward" as ?assertionOrientation)
+        }
+        union
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?m ?assertedPredicate ?sParent .
+            }
+            bind("reverse" as ?assertionOrientation)
+        }
     }
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
         ?m rdfs:label ?ml ;
            <http://www.geneontology.org/formats/oboInOwl#id> ?mid
     }
 }',
-  "mondo->snomed->NLM mappings->icd9" = 'select distinct ?mid ?ml
-  ("mondo->snomed->NLM mappings->icd9" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-  (concat("ICD", str(?icdVer), "CM:", ?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+  "mondo->snomed,transitive->NLM mappings->icd9" = 'select
+  distinct
+?mid ?ml
+("mondo->snomed,transitive->NLM mappings->icd9" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+(concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
-  {
-            graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-                ?icd skos:notation ?icdCode ;
-                     skos:prefLabel ?ipl  .
-            }
-            bind(9 as ?icdVer)
-  }
-      graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        # this grpah has lots of filterable properties like
-        # mydata:AVG_USAGE, mydata:CORE_USAGE, mydata:IN_CORE, mydata:IS_1-1MAP
-        ?icd9cm_to_snomedct mydata:SNOMED_CID ?CID ;
-                            mydata:ICD_CODE ?icdCode .
-      }
-        graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
-        ?snomed a owl:Class ;
-                skos:notation ?CID .
-        }
-        graph ?rewriteGraph {
-        ?m ?assertedPredicate ?snomed
-        }
-    graph <http://example.com/resource/AssertionOrientations> {
-        ?rewriteGraph rdfs:label ?assertionOrientation .
+    graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+        ?icd skos:notation ?icdCode ;
+             skos:prefLabel ?ipl .
+        bind("ICD9CM:" as ?icdVer)
     }
-
-    graph <http://example.com/resource/MondoTransitiveSubClasses> {
-        ?m rdfs:subClassOf <http://purl.obolibrary.org/obo/MONDO_0000001> .
+    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+        ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?s
+    }
+    graph <http://example.com/resource/SnomedDiseaseTransitiveSubClasses> {
+        ?s rdfs:subClassOf ?sParent .
+    }
+    {
+        {
+            graph <http://example.com/resource/rewrites_MonDO_subject> {
+                ?m ?assertedPredicate ?sParent .
+            }
+            bind("forward" as ?assertionOrientation)
+        }
+        union
+        {
+            graph <http://example.com/resource/rewrites_MonDO_object> {
+                ?m ?assertedPredicate ?sParent .
+            }
+            bind("reverse" as ?assertionOrientation)
+        }
     }
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
-        ?m rdfs:label ?ml ;
-           <http://www.geneontology.org/formats/oboInOwl#id> ?mid
+        ?m <http://www.geneontology.org/formats/oboInOwl#id> ?mid ;
+           rdfs:label ?ml .
     }
-}'
+}
+# filter out root MonDO or SNOMED roots  after the fact?'
 )
+
 
 chunk.count <- length(the.chunks)
 
@@ -350,7 +529,7 @@ outer <-
     
     # 1:chunk.count
     inner <-
-      lapply(1:chunk.count, function(chunk.index) {
+      lapply(1:9, function(chunk.index) {
         # lapply(65:70, function(chunk.index) {
         # current.chunk <- the.chunks[[1]]
         print(
@@ -415,7 +594,7 @@ outer <- do.call(rbind.data.frame, outer)
 paths.per.mapping <-
   as.data.frame(table(outer$mid, outer$versionedIcd))
 paths.per.mapping <-
-  paths.per.mapping[paths.per.mapping$Freq > 0 ,]
+  paths.per.mapping[paths.per.mapping$Freq > 0 , ]
 hist(paths.per.mapping$Freq)
 
 mappings.per.path <-
@@ -425,6 +604,93 @@ mappings.per.path <-
     outer$assertedPredicate
   ))
 mappings.per.path <-
-  mappings.per.path[mappings.per.path$Freq > 0 , ]
+  mappings.per.path[mappings.per.path$Freq > 0 ,]
 
-hist(mappings.per.path$Freq, breaks = 99)
+# hist(mappings.per.path$Freq, breaks = 99)
+
+write.csv(mappings.per.path, "mappings_per_path.csv")
+write.csv(paths.per.mapping, "paths_per_mapping.csv")
+
+paths.per.mapping.table <- table(paths.per.mapping$Freq)
+paths.per.mapping.table <-
+  cbind.data.frame(as.numeric(names(paths.per.mapping.table)), as.numeric(paths.per.mapping.table))
+names(paths.per.mapping.table) <- c("path.count", "mappings.count")
+
+write.csv(paths.per.mapping.table, "paths_per_mapping.csv")
+
+requested <- unique(icdlist$X1)
+delivered <- unique(outer$versionedIcd)
+delivered <- sub(pattern = "^.*:",
+                 replacement = "",
+                 x = delivered)
+
+delivered.only <- setdiff(delivered, requested)
+
+requested.only <- setdiff(requested, delivered)
+
+sort(requested)
+sort(delivered)
+sort(requested.only)
+
+# 003.1 : Salmonella septicemia
+
+length(unique(outer$versionedIcd))
+length(unique(anurag_icd_mondo_report_1$ICD))
+
+anurag_icd_mondo_report_1 <-
+  read_csv("Anurag/anurag_icd_mondo_report_1.csv")
+
+
+anurag_icd_mondo_report_1$bare.icd <-
+  sub(pattern = 'http://purl.bioontology.org/ontology/ICD[0-9]{1,2}CM/',
+      replacement = '',
+      x = anurag_icd_mondo_report_1$ICD)
+
+previous.successes <-
+  intersect(requested, anurag_icd_mondo_report_1$bare.icd)
+
+new.failures <- setdiff(previous.successes, delivered)
+
+sort(new.failures)
+
+insights <-
+  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% new.failures ,]
+insight.paths <- insights$mapping_method
+insight.paths <- strsplit(insight.paths, split = ";")
+insight.paths <- unlist(insight.paths)
+insight.paths <-
+  gsub(pattern = '"',
+       replacement = '',
+       x = insight.paths)
+insight.paths <- table(insight.paths)
+insight.paths <-
+  cbind.data.frame(names(insight.paths), as.numeric(insight.paths))
+
+lost.mondos <- table(insights$MONDO_label)
+lost.mondos <-
+  cbind.data.frame(names(lost.mondos), as.numeric(lost.mondos))
+
+lost.icd9s <-
+  insights$bare.icd[grep(pattern = "http://purl.bioontology.org/ontology/ICD9CM/", x = insights$ICD)]
+lost.icd9.sample <-
+  sort(sample(sort(lost.icd9s), size = 200, replace = FALSE))
+
+ICD9CM_SNOMED_MAP_1TO1_201812 <-
+  read_delim(
+    "ICD9CM_SNOMED_MAP_1TO1_201812.txt",
+    "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE
+  )
+
+ICD9CM_SNOMED_MAP_1TOM_201812 <-
+  read_delim(
+    "ICD9CM_SNOMED_MAP_1TOM_201812.txt",
+    "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE
+  )
+
+ICD9CM_SNOMED_MAP_201812 <-
+  rbind.data.frame(ICD9CM_SNOMED_MAP_1TO1_201812,
+                   ICD9CM_SNOMED_MAP_1TOM_201812)
