@@ -1,9 +1,8 @@
 library(readr)
 library(data.table)
 library(dplyr)
-# library()
 
-# requires setup from disease_diagnosis_dev.R
+source("turbo_graphdb_setup.R")
 
 # 5+ minutes for query
 # ~ 4 additional minutes for local socket "download" and parse into R data structure
@@ -220,3 +219,5 @@ joined <-
     by = c("axVal" = "s"),
     suffix = c("", ".val")
   )
+
+write.csv(joined,"written.csv")
