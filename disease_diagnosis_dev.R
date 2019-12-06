@@ -248,11 +248,13 @@ monitor.named.graphs <- function() {
       context.report$results$bindings$contextID$value
     
     # SHOULD THESE BE LEFT AS GLOBALS OR BE SWITCHED TO FUNCTION PARAMETERS?
-    print(paste0(Sys.time(),
-                 ": '",
-                 last.post.status,
-                 "' submitted at ",
-                 last.post.time))
+    print(paste0(
+      Sys.time(),
+      ": '",
+      last.post.status,
+      "' submitted at ",
+      last.post.time
+    ))
     # print(paste0("Expecting graphs ", expectation, collapse = " ; "))
     # print(paste0("Current graphs ", context.report, collapse = " ; "))
     
@@ -272,7 +274,10 @@ monitor.named.graphs <- function() {
     }
   }
 }
-###   ###   ###
+
+###  END OF SETUP
+
+
 
 #' # RDF4J configuration template for the GraphDB Free repository
 #' @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
