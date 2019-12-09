@@ -2,8 +2,32 @@ library(stringr)
 library(data.table)
 library(readr)
 library(dplyr)
+library(RPostgres)
+library(data.table)
+library(DBI)
 
 source("turbo_graphdb_setup.R")
+
+selected.postgres.configuration <-
+  config::get(config = "dd_postgres",
+              file = "disease_diagnosis.yaml")
+
+host.name <- selected.postgres.configuration$host
+database.name <- selected.postgres.configuration$dbname
+postgres.user <- selected.postgres.configuration$user
+# postgres.passwd <- rstudioapi::askForPassword("Database password")
+postgres.passwd <- selected.postgres.configuration$pgpass
+postgres.port <- selected.postgres.configuration$port
+dd.table.name <- selected.postgres.configuration$dd.table.name
+
+pg.RPostgres <- dbConnect(
+  RPostgres::Postgres(),
+  host = host.name,
+  dbname = database.name,
+  user = postgres.user,
+  password = postgres.passwd,
+  port = postgres.port
+)
 
 icdlist.file <-
   rstudioapi::selectFile(
@@ -21,31 +45,34 @@ icdlist <- read_csv(icdlist.file, col_names = FALSE)
 print(nrow(icdlist))
 # 26450
 # how many can SPARQL candle per chunk?
-# 200-300 seems OK
-
+# ~ 200 seems OK
 # too big -> un-parsable result or failed distinct operation
 # just do the distinct externally?
+
 chunk.size <- 200
 
+col2vec <- icdlist$X1
+
+# col2vec <- "137.4"
+
 the.chunks <-
-  split(icdlist$X1, ceiling(seq_along(icdlist$X1) / chunk.size))
+  split(col2vec, ceiling(seq_along(col2vec) / chunk.size))
 
 # does the ordering of query lines
 #  or {} grouping of the query matter for performance?
 # can we give hints?
 
-# snomed transitivity?
+# snomed and ICD transitivity required to replicate anurag_icd_mondo_report_1
+# whether subClasOf* or materialized subclasses is better is unclear!
 
 # filter?
-
-
 
 query.templates <- list(
   "mondo->icd" = 'select
   #distinct
   ?mid ?ml ?approxDepth
   ("mondo->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-  (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+  (concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
     {
@@ -58,7 +85,7 @@ where {
 #            graph <http://example.com/resource/ICD10TransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(10 as ?icdVer)
+            bind("ICD10CM:" as ?icdVer)
         }
         union
         {
@@ -70,7 +97,7 @@ where {
 #            graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(9 as ?icdVer)
+            bind("ICD9CM:" as ?icdVer)
         }
     }
     {
@@ -100,7 +127,7 @@ where {
   #distinct
   ?mid ?ml ?approxDepth
   ("mondo->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-  (concat("ICD", str(?icdVer), "CM:",?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+  (concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
     {
@@ -113,7 +140,7 @@ where {
 #            graph <http://example.com/resource/ICD10TransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(10 as ?icdVer)
+            bind("ICD10CM:" as ?icdVer)
         }
         union
         {
@@ -125,7 +152,7 @@ where {
 #            graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(9 as ?icdVer)
+            bind("ICD9CM:" as ?icdVer)
         }
     }
         graph <http://example.com/resource/materializedCui> {
@@ -156,10 +183,10 @@ where {
     }
 }',
   "mondo->snomed->CUI->icd" = 'select
-#distinct
-?mid ?ml ?approxDepth
-("mondo->snomed,transitive->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-(concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
+  #distinct
+  ?mid ?ml ?approxDepth
+  ("mondo->snomed->CUI->icd" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+  (concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
     {
@@ -172,7 +199,7 @@ where {
 #            graph <http://example.com/resource/ICD10TransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(10 as ?icdVer)
+            bind("ICD10CM:" as ?icdVer)
         }
         union
         {
@@ -184,10 +211,9 @@ where {
 #            graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
 #                ?icdLeaf rdfs:subClassOf ?icd
 #            }
-            bind(9 as ?icdVer)
+            bind("ICD9CM:" as ?icdVer)
         }
     }
-
     graph <http://example.com/resource/materializedCui> {
         ?icd mydata:materializedCui ?cui .
         ?snomed mydata:materializedCui ?cui .
@@ -220,24 +246,22 @@ where {
     }
 }',
   "mondo->snomed,transitive->NLM mappings->icd9" = 'select
-# distinct
-?mid ?ml
-?approxDepth
-#(max(?approxDepth) as ?approxMaxDepth)
-("mondo->snomed,transitive->NLM mappings->icd9" as ?pathFamily) ?assertionOrientation ?assertedPredicate
-(concat(?icdVer,?icdCode) as ?versionedIcd) (str(?ipl) as ?iplstr)
+  #distinct
+  ?mid ?ml ?approxDepth
+  ("mondo->snomed,transitive->NLM mappings->icd9" as ?pathFamily) ?assertionOrientation ?assertedPredicate
+  (concat(?icdVer,?icdCode) as ?versionedIcd)  (str(?ipl) as ?iplstr)
 where {
     values ?icdCode { ${current.assembled} }
     {
-        graph <http://purl.bioontology.org/ontology/ICD9CM/> {
-            ?icdLeaf skos:notation ?icdCode ;
-                     rdfs:subClassOf* ?icd ;
-                                    skos:prefLabel ?ipl  .
-        }
-        #            graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
-        #                ?icdLeaf rdfs:subClassOf ?icd
-        #            }
-        bind(9 as ?icdVer)
+         graph <http://purl.bioontology.org/ontology/ICD9CM/> {
+                ?icdLeaf skos:notation ?icdCode ;
+                         rdfs:subClassOf* ?icd ;
+                         skos:prefLabel ?ipl  .
+            }
+#            graph <http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses> {
+#                ?icdLeaf rdfs:subClassOf ?icd
+#            }
+            bind("ICD9CM:" as ?icdVer)
     }
     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
         ?icd <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> ?snomed
@@ -273,26 +297,32 @@ where {
 )
 
 # filter out root MonDO or SNOMED roots  after the fact?
-# almost all of the slowness (1 minute per chunk of 250)
-# n the last query is from transport of the results
-# even though they have been uniqified
-# larger memory on turbo-prd-db01 does not help
+# almost all of the slowness (1.5 minutes+ per chunk of 200)
+# even when they have been uniqified
+# in the NLM mappings query is from transport of the results over localhost
+#   AND PARSING in R
+
+# larger memory on turbo-prd-db01 does not help ?!
+# haven't been able to get http compression to work in SAPRQL::
 # limit to deepest mapping in sparql?
 
+# # may be too deep/overly specific on the mondo side sometimes?
+# see typhoid vs gi disorder?
 
 chunk.count <- length(the.chunks)
 
 
 outer <-
-  lapply(names(query.templates), function(current.template.name) {
+  lapply(names(query.templates)[3:3], function(current.template.name) {
     # current.template.name <- "mondo->icd"
     # print(current.template.name)
     
     # 1:chunk.count
     inner <-
-      lapply(1:3, function(chunk.index) {
+      lapply(76:chunk.count, function(chunk.index) {
         # lapply(65:70, function(chunk.index) {
         # current.chunk <- the.chunks[[1]]
+        # current.chunk <- list("137.4 ")
         print(
           paste0(
             Sys.time(),
@@ -322,7 +352,6 @@ outer <-
         
         # cat(prefixed)
         
-        
         sparql.res.list <- SPARQL(
           url =  select.endpoint,
           query = prefixed,
@@ -345,151 +374,91 @@ outer <-
           )
         )
         
-        return(sparql.res.list$results)
+        temp <- sparql.res.list$results
+        if (is.data.frame(temp)) {
+          if (nrow(temp) > 0) {
+            temp$chunk <- chunk.index
+            
+            write.result <-
+              dbWriteTable(pg.RPostgres,
+                           dd.table.name,
+                           temp,
+                           overwrite = FALSE,
+                           append = TRUE)
+            
+            # doesn't help... no woking over all environments?
+            gc()
+            
+            objects.sizes <- lapply(ls(), function(current.obj) {
+              the.size <- object.size(current.obj)
+              return(list(current.obj, the.size))
+            })
+            
+            objects.sizes <-
+              do.call(rbind.data.frame, objects.sizes)
+            names(objects.sizes) <- c("object", "size")
+            objects.sizes <-
+              objects.sizes[order(objects.sizes$size, decreasing = TRUE),]
+            print(head(objects.sizes))
+            
+          }
+          
+          
+        }
+        
+        return(0)
+        
+        # return(sparql.res.list$results)
       })
-    inner <- do.call(rbind.data.frame, inner)
-    return(inner)
+    # inner <- do.call(rbind.data.frame, inner)
+    # return(inner)
+    return(0)
   })
+# outer <- do.call(rbind.data.frame, outer)
 
-outer <- do.call(rbind.data.frame, outer)
+outer <-
+  dbGetQuery(pg.RPostgres, paste0("select * from ", dd.table.name))
 
-outer <- unique(outer)
+keepers <- setdiff(names(outer), "chunk")
 
-# may be too deep/overly specific on the mondo side sometimes?
+outer <- unique(outer[, keepers])
+
+# tablulate the mondo classes after the fact?
+# # "deepest" alone may be too deep/overly specific on the mondo side sometimes?
+
+mondo.count <- table(outer$mid)
+mondo.count <-
+  cbind.data.frame(names(mondo.count), as.numeric(mondo.count))
+names(mondo.count) <- c("mid","count")
+
+outer <- left_join(outer, mondo.count)
+outer$dcr <- outer$approxDepth/outer$count
+
 deepest <-
-  outer %>% group_by(versionedIcd) %>% top_n(1, approxDepth)
+  outer %>% group_by(versionedIcd) %>% top_n(1, dcr)
 
-### tables
-
-paths.per.mapping <-
-  as.data.frame(table(outer$mid, outer$versionedIcd))
-paths.per.mapping <-
-  paths.per.mapping[paths.per.mapping$Freq > 0 , ]
-hist(paths.per.mapping$Freq)
-
-mappings.per.path <-
-  as.data.frame(table(
-    outer$pathFamily,
-    outer$assertionOrientation,
-    outer$assertedPredicate
-  ))
-mappings.per.path <-
-  mappings.per.path[mappings.per.path$Freq > 0 ,]
-
-# hist(mappings.per.path$Freq, breaks = 99)
-
-write.csv(mappings.per.path, "mappings_per_path.csv")
-write.csv(paths.per.mapping, "paths_per_mapping.csv")
-
-paths.per.mapping.table <- table(paths.per.mapping$Freq)
-paths.per.mapping.table <-
-  cbind.data.frame(as.numeric(names(paths.per.mapping.table)), as.numeric(paths.per.mapping.table))
-names(paths.per.mapping.table) <- c("path.count", "mappings.count")
-
-write.csv(paths.per.mapping.table, "paths_per_mapping.csv")
+### historical comparison
 
 requested <- unique(icdlist$X1)
-delivered <- unique(outer$versionedIcd)
-delivered <- sub(pattern = "^.*:",
-                 replacement = "",
-                 x = delivered)
-
-delivered.only <- setdiff(delivered, requested)
-
-requested.only <- setdiff(requested, delivered)
-
-sort(requested)
-sort(delivered)
-sort(requested.only)
-
-# 003.1 : Salmonella septicemia
-
-length(unique(outer$versionedIcd))
-length(unique(anurag_icd_mondo_report_1$ICD))
 
 anurag_icd_mondo_report_1 <-
   read_csv("Anurag/anurag_icd_mondo_report_1.csv")
 
-
 anurag_icd_mondo_report_1$bare.icd <-
   sub(pattern = 'http://purl.bioontology.org/ontology/ICD[0-9]{1,2}CM/',
       replacement = '',
       x = anurag_icd_mondo_report_1$ICD)
 
-previous.successes <-
-  intersect(requested, anurag_icd_mondo_report_1$bare.icd)
-
-new.failures <- setdiff(previous.successes, delivered)
-
-sort(new.failures)
-
-insights <-
-  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% new.failures ,]
-insight.paths <- insights$mapping_method
-insight.paths <- strsplit(insight.paths, split = ";")
-insight.paths <- unlist(insight.paths)
-insight.paths <-
-  gsub(pattern = '"',
-       replacement = '',
-       x = insight.paths)
-insight.paths <- table(insight.paths)
-insight.paths <-
-  cbind.data.frame(names(insight.paths), as.numeric(insight.paths))
-
-lost.mondos <- table(insights$MONDO_label)
-lost.mondos <-
-  cbind.data.frame(names(lost.mondos), as.numeric(lost.mondos))
-
-lost.icd9s <-
-  insights$bare.icd[grep(pattern = "http://purl.bioontology.org/ontology/ICD9CM/", x = insights$ICD)]
-lost.icd9.sample <-
-  sort(sample(sort(lost.icd9s), size = 200, replace = FALSE))
-
-ICD9CM_SNOMED_MAP_1TO1_201812 <-
-  read_delim(
-    "ICD9CM_SNOMED_MAP_1TO1_201812.txt",
-    "\t",
-    escape_double = FALSE,
-    trim_ws = TRUE
-  )
-
-ICD9CM_SNOMED_MAP_1TOM_201812 <-
-  read_delim(
-    "ICD9CM_SNOMED_MAP_1TOM_201812.txt",
-    "\t",
-    escape_double = FALSE,
-    trim_ws = TRUE
-  )
-
-# hist(mappings.per.path$Freq, breaks = 99)
-
-# write.csv(mappings.per.path, "mappings_per_path.csv")
-# write.csv(paths.per.mapping, "paths_per_mapping.csv")
-
-paths.per.mapping.table <- table(paths.per.mapping$Freq)
-paths.per.mapping.table <-
-  cbind.data.frame(as.numeric(names(paths.per.mapping.table)), as.numeric(paths.per.mapping.table))
-names(paths.per.mapping.table) <- c("path.count", "mappings.count")
-
-# write.csv(paths.per.mapping.table, "paths_per_mapping.csv")
-
-
-### historical comparison
-
-
-requested <- unique(icdlist$X1)
-
-anurag_icd_mondo_report_1$bare.icd <-
-  sub(pattern = 'http://purl.bioontology.org/ontology/ICD[0-9]{1,2}CM/',
-      replacement = '',
-      x = anurag_icd_mondo_report_1$ICD)
+delivered <- anurag_icd_mondo_report_1$bare.icd
 
 previous.successes <-
-  intersect(requested, anurag_icd_mondo_report_1$bare.icd)
+  intersect(requested, delivered)
 
+previous.unmapped <- setdiff(requested, delivered)
 
-###
+previous.unrequested <- setdiff(delivered, requested)
 
+### QC
 
 delivered.new <- unique(outer$versionedIcd)
 
@@ -502,7 +471,7 @@ ps.only <- setdiff(previous.successes, delivered.new)
 dn.only <- setdiff(delivered.new, previous.successes)
 
 insights <-
-  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% ps.only , ]
+  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% ps.only ,]
 insight.paths <- insights$mapping_method
 insight.paths <- strsplit(insight.paths, split = ";")
 insight.paths <- unlist(insight.paths)
@@ -514,74 +483,64 @@ insight.paths <- table(insight.paths)
 insight.paths <-
   cbind.data.frame(names(insight.paths), as.numeric(insight.paths))
 
-
-
-
-# delivered.only <- setdiff(delivered, requested)
+# #not really necessary if the disjoints are small
+# lost.mondos <- table(insights$MONDO_label)
+# lost.mondos <-
+#   cbind.data.frame(names(lost.mondos), as.numeric(lost.mondos))
 #
-# requested.only <- setdiff(requested, delivered)
+# lost.icd9s <-
+#   insights$bare.icd[grep(pattern = "http://purl.bioontology.org/ontology/ICD9CM/", x = insights$ICD)]
+# lost.icd9.sample <-
+#   sort(sample(sort(lost.icd9s), size = 200, replace = FALSE))
+
+### tables
+# running out of memory, when processing the un-deepestified "outer" with 16 GB
+
+paths.per.mapping <-
+  as.data.frame(table(deepest$mid, deepest$versionedIcd))
+# Error: cannot allocate vector of size 1008.8 Mb
+paths.per.mapping <-
+  paths.per.mapping[paths.per.mapping$Freq > 0 , ]
+hist(paths.per.mapping$Freq)
+
+paths.per.mapping.table <- table(paths.per.mapping$Freq)
+paths.per.mapping.table <-
+  cbind.data.frame(as.numeric(names(paths.per.mapping.table)), as.numeric(paths.per.mapping.table))
+names(paths.per.mapping.table) <- c("path.count", "mappings.count")
+
+mappings.per.path <-
+  as.data.frame(table(
+    deepest$pathFamily,
+    deepest$assertionOrientation,
+    deepest$assertedPredicate
+  ))
+mappings.per.path <-
+  mappings.per.path[mappings.per.path$Freq > 0 , ]
+
+# # hist(mappings.per.path$Freq, breaks = 99)
 #
-# sort(requested)
-# sort(delivered)
-# sort(requested.only)
+# write.csv(mappings.per.path, "mappings_per_path.csv")
+# write.csv(paths.per.mapping, "paths_per_mapping.csv")
+# write.csv(paths.per.mapping.table, "paths_per_mapping.csv")
+
+# ### for daignosing apparent broken links from NLM snomed icd9 mapping
 #
-# # 003.1 : Salmonella septicemia
+# ICD9CM_SNOMED_MAP_1TO1_201812 <-
+#   read_delim(
+#     "ICD9CM_SNOMED_MAP_1TO1_201812.txt",
+#     "\t",
+#     escape_double = FALSE,
+#     trim_ws = TRUE
+#   )
 #
-# length(unique(outer$versionedIcd))
+# ICD9CM_SNOMED_MAP_1TOM_201812 <-
+#   read_delim(
+#     "ICD9CM_SNOMED_MAP_1TOM_201812.txt",
+#     "\t",
+#     escape_double = FALSE,
+#     trim_ws = TRUE
+#   )
 #
-# anurag_icd_mondo_report_1 <- read_csv("Anurag/anurag_icd_mondo_report_1.csv")
-#
-# length(unique(anurag_icd_mondo_report_1$ICD))
-
-
-
-
-
-new.failures <- setdiff(previous.successes, delivered)
-
-sort(new.failures)
-
-insights <-
-  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% new.failures , ]
-insight.paths <- insights$mapping_method
-insight.paths <- strsplit(insight.paths, split = ";")
-insight.paths <- unlist(insight.paths)
-insight.paths <-
-  gsub(pattern = '"',
-       replacement = '',
-       x = insight.paths)
-insight.paths <- table(insight.paths)
-insight.paths <-
-  cbind.data.frame(names(insight.paths), as.numeric(insight.paths))
-
-lost.mondos <- table(insights$MONDO_label)
-lost.mondos <-
-  cbind.data.frame(names(lost.mondos), as.numeric(lost.mondos))
-
-lost.icd9s <-
-  insights$bare.icd[grep(pattern = "http://purl.bioontology.org/ontology/ICD9CM/", x = insights$ICD)]
-
-lost.icd9.sample <-
-  sort(sample(sort(lost.icd9s), size = 200, replace = FALSE))
-
-### for daignosis apparent broken links from nlm snomed icd9 mapping
-
-ICD9CM_SNOMED_MAP_1TO1_201812 <-
-  read_delim(
-    "ICD9CM_SNOMED_MAP_1TO1_201812.txt",
-    "\t",
-    escape_double = FALSE,
-    trim_ws = TRUE
-  )
-
-ICD9CM_SNOMED_MAP_1TOM_201812 <-
-  read_delim(
-    "ICD9CM_SNOMED_MAP_1TOM_201812.txt",
-    "\t",
-    escape_double = FALSE,
-    trim_ws = TRUE
-  )
-
-ICD9CM_SNOMED_MAP_201812 <-
-  rbind.data.frame(ICD9CM_SNOMED_MAP_1TO1_201812,
-                   ICD9CM_SNOMED_MAP_1TOM_201812)
+# ICD9CM_SNOMED_MAP_201812 <-
+#   rbind.data.frame(ICD9CM_SNOMED_MAP_1TO1_201812,
+#                    ICD9CM_SNOMED_MAP_1TOM_201812)
