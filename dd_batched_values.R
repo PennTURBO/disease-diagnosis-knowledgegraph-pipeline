@@ -471,7 +471,7 @@ ps.only <- setdiff(previous.successes, delivered.new)
 dn.only <- setdiff(delivered.new, previous.successes)
 
 insights <-
-  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% ps.only ,]
+  anurag_icd_mondo_report_1[anurag_icd_mondo_report_1$bare.icd %in% ps.only , ]
 insight.paths <- insights$mapping_method
 insight.paths <- strsplit(insight.paths, split = ";")
 insight.paths <- unlist(insight.paths)
@@ -500,7 +500,7 @@ paths.per.mapping <-
   as.data.frame(table(deepest$mid, deepest$versionedIcd))
 # Error: cannot allocate vector of size 1008.8 Mb
 paths.per.mapping <-
-  paths.per.mapping[paths.per.mapping$Freq > 0 , ]
+  paths.per.mapping[paths.per.mapping$Freq > 0 ,]
 hist(paths.per.mapping$Freq)
 
 paths.per.mapping.table <- table(paths.per.mapping$Freq)
@@ -509,13 +509,15 @@ paths.per.mapping.table <-
 names(paths.per.mapping.table) <- c("path.count", "mappings.count")
 
 mappings.per.path <-
-  as.data.frame(table(
-    deepest$pathFamily,
-    deepest$assertionOrientation,
-    deepest$assertedPredicate
-  ))
+  as.data.frame(
+    table(
+      deepest$pathFamily,
+      deepest$assertionOrientation,
+      deepest$assertedPredicate
+    )
+  )
 mappings.per.path <-
-  mappings.per.path[mappings.per.path$Freq > 0 , ]
+  mappings.per.path[mappings.per.path$Freq > 0 ,]
 
 # # hist(mappings.per.path$Freq, breaks = 99)
 #
@@ -544,3 +546,49 @@ mappings.per.path <-
 # ICD9CM_SNOMED_MAP_201812 <-
 #   rbind.data.frame(ICD9CM_SNOMED_MAP_1TO1_201812,
 #                    ICD9CM_SNOMED_MAP_1TOM_201812)
+
+### beautify
+
+#  dput(names(deepest))
+
+
+names(deepest) <-
+  c(
+    "MonDO Term",
+    "MonDO Label",
+    "Approx. Depth",
+    "Path Family",
+    "MonDO Assertion Direction",
+    "Asserted Predicate",
+    "ICD Code",
+    "ICD Label",
+    "MonDO Count",
+    "D/C ratio"
+  )
+
+deepest <- deepest[, c(
+  "MonDO Term",
+  "MonDO Label",
+  "Path Family",
+  "Asserted Predicate",
+  "MonDO Assertion Direction",
+  "ICD Code",
+  "ICD Label",
+  "D/C ratio",
+  "Approx. Depth",
+  "MonDO Count"
+)]
+
+write.csv(deepest, "lm_ao_anurag_verbose_report_dcr_filtered.csv")
+
+length(setdiff(requested, delivered.new))
+
+length(setdiff(delivered.new, requested))
+
+length(intersect(delivered.new, requested))
+
+length(intersect(delivered.new, requested))/length(unique(c(requested, delivered.new)))
+
+
+
+length(intersect(delivered, requested))/length(unique(c(requested, delivered)))
