@@ -39,6 +39,7 @@ saved.authentication <-
   authenticate(api.user, api.pass, type = "basic")
 
 sparql.prefixes <- "
+PREFIX hgnc: <http://identifiers.org/hgnc/>
 PREFIX mondo: <http://purl.obolibrary.org/obo/mondo#>
 PREFIX mydata: <http://example.com/resource/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
