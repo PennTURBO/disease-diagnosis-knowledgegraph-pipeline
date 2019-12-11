@@ -3,13 +3,15 @@ library(config)
 library(httr)
 library(jsonlite)
 
+config.yaml.file <- "~/disease_diagnosis.yaml"
+
 
 config.bootstrap <-
-  config::get(file = "disease_diagnosis.yaml")
+  config::get(file = config.yaml.file)
 
 selected.gdb.configuration <-
   config::get(config = config.bootstrap$selected.gdb.configuration,
-              file = "disease_diagnosis.yaml")
+              file = config.yaml.file)
 
 monitor.pause.seconds <- config.bootstrap$monitor.pause.seconds
 snomed.triples.file <-

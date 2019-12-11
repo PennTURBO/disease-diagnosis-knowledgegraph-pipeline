@@ -10,7 +10,7 @@ source("turbo_graphdb_setup.R")
 
 selected.postgres.configuration <-
   config::get(config = "dd_postgres",
-              file = "disease_diagnosis.yaml")
+              file = config.yaml.file)
 
 host.name <- selected.postgres.configuration$host
 database.name <- selected.postgres.configuration$dbname
