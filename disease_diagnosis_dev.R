@@ -1,5 +1,6 @@
-library(SPARQL)
 library(config)
+library(SPARQL)
+
 library(httr)
 library(jsonlite)
 
