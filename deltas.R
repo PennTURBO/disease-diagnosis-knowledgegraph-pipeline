@@ -6,8 +6,7 @@ obj.list <- ls()
 obj.list <- setdiff(obj.list, "outer")
 rm(list = obj.list)
 
-lung_cancer_axioms <-
-  read_csv("lung_cancer_axioms.csv")
+lung_cancer_axioms <-  read_csv("lung_cancer_axioms.csv")
 
 lungCancerMappings_withCSR <-
   read_csv("lungCancerMappings_withCSR.csv.csv")
@@ -114,8 +113,7 @@ requests <- sort(unique(as.character(icd_code_list$X1)))
 h.delivered <-
   sort(unique(as.character(icd_report$bareIcd)))
 
-icd_report$versionedIcd <-
-  paste0(icd_report$versionedIcd, icd_report$bareIcd)
+icd_report$versionedIcd <- paste0(icd_report$versionedIcd, icd_report$bareIcd)
 
 h.intersect <- intersect(requests, h.delivered)
 
@@ -146,6 +144,7 @@ length(md.only)
 
 h.frame <-
   unique(icd_report[, c("mid", "versionedIcd")])
+
 h.frame <- h.frame[order(h.frame$versionedIcd, h.frame$mid), ]
 
 m.frame <- unique(outer[, c("mid", "versionedIcd")])
