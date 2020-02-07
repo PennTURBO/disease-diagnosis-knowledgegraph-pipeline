@@ -7,14 +7,14 @@ obj.list <- setdiff(obj.list, "outer")
 rm(list = obj.list)
 
 lung_cancer_axioms <-
-  read_csv("disease_to_diagnosis_code/lung_cancer_axioms.csv")
+  read_csv("lung_cancer_axioms.csv")
 
 lungCancerMappings_withCSR <-
-  read_csv("disease_to_diagnosis_code/lungCancerMappings_withCSR.csv.csv")
+  read_csv("lungCancerMappings_withCSR.csv.csv")
 
 # based on arnurag's icd input
 simple_mondo_axiom_list_tidied <-
-  read_csv("disease_to_diagnosis_code/simple_mondo_axiom_list_tidied.csv")
+  read_csv("simple_mondo_axiom_list_tidied.csv")
 
 anurag_icd_sparqlResults <-
   read_csv("~/anurag_icd_sparqlResults.csv")
@@ -114,7 +114,8 @@ requests <- sort(unique(as.character(icd_code_list$X1)))
 h.delivered <-
   sort(unique(as.character(icd_report$bareIcd)))
 
-icd_report$versionedIcd <- paste0(icd_report$versionedIcd, icd_report$bareIcd)
+icd_report$versionedIcd <-
+  paste0(icd_report$versionedIcd, icd_report$bareIcd)
 
 h.intersect <- intersect(requests, h.delivered)
 
@@ -145,10 +146,10 @@ length(md.only)
 
 h.frame <-
   unique(icd_report[, c("mid", "versionedIcd")])
-h.frame <- h.frame[order(h.frame$versionedIcd, h.frame$mid),]
+h.frame <- h.frame[order(h.frame$versionedIcd, h.frame$mid), ]
 
 m.frame <- unique(outer[, c("mid", "versionedIcd")])
-m.frame <- m.frame[order(m.frame$versionedIcd, m.frame$mid),]
+m.frame <- m.frame[order(m.frame$versionedIcd, m.frame$mid), ]
 
 write_csv(h.frame, "h_mappings.csv")
 write_csv(m.frame, "m_mappings.csv")
