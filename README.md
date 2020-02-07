@@ -71,3 +71,28 @@ For example
 Among other ways, the graphdb import folder can be determined by logging into the web console (workbench), going to the import rdf -> server page, and clicking on a ? icon
 
 Then just run `disease_diagnosis_dev`
+
+## Graphs created
+
+I'll elaborate soon. We could talk about codifying the graph names, the prefixes and IRI bases, and even the novel predicates used in each graph
+
+- http://example.com/resource/ICD10CM_siblings 
+- http://example.com/resource/ICD10TransitiveSubClasses 
+- http://example.com/resource/ICD9CM_siblings 
+- http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses 
+- http://example.com/resource/MondoTransitiveSubClasses
+- http://example.com/resource/SnomedDiseaseTransitiveSubClasses 
+- http://example.com/resource/definedIn 
+- http://example.com/resource/icd9range 
+- http://example.com/resource/materializedCui 
+- http://example.com/resource/materializedSimpleMondoAxioms 
+- http://example.com/resource/mondoOriginals 
+- http://example.com/resource/rewrites_MonDO_object 
+- http://example.com/resource/rewrites_MonDO_subject 
+- http://example.com/resource/undefinedRewrites 
+- http://purl.bioontology.org/ontology/ICD10CM/ 
+- http://purl.bioontology.org/ontology/ICD9CM/ 
+- http://purl.bioontology.org/ontology/SNOMEDCT_US/ 
+- http://purl.bioontology.org/ontology/STY/ 
+- http://purl.obolibrary.org/obo/mondo.owl 
+- https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html
