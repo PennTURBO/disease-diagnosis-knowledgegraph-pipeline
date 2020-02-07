@@ -1,0 +1,10 @@
+default:
+  selected.gdb.configuration: 'turbo-prd-db01'
+
+turbo-prd-db01:
+  graphdb.address.port: 'http://server.domain:port'
+  selected.repo: 'Diagnosis_KnowledgeGraph'
+  api.user: 'markampa'
+  # works with empty string if graphdb authentication has been disabled
+  #   in the selected.repo
+  api.pass: 'SECRET'
