@@ -32,6 +32,14 @@ insert data {
 ```
 Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquivalenceAxioms` is a supplement to `http://example.com/resource/materializedSimpleMondoAxioms`, and ...`MondoTransitiveSimpleScoEqcAxioms` applies the axiom materializations (including rare, syndromic, congenital...) to disease subclasses.
 
+- OneNote
+- GitHub
+- local files
+    - R
+    - md
+    - rq / sparql
+
+
 ```R
 [3] "http://example.com/resource/diseaseDepth"  
 ```
