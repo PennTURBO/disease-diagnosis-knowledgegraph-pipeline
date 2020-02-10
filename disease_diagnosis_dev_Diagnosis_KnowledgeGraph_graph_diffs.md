@@ -35,6 +35,35 @@ materializedVerySimpleMondoEquivalenceAxioms: 6849
 
 Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquivalenceAxioms` is a supplement to `http://example.com/resource/materializedSimpleMondoAxioms`, and ...`MondoTransitiveSimpleScoEqcAxioms` applies the axiom materializations (including rare, syndromic, congenital...) to disease subclasses.
 
+`materializedVerySimpleMondoEquivalenceAxioms` implementation:
+
+```SPARQL
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+insert {
+    graph <http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms> {
+        ?d ?onProp ?valSource .
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?d owl:equivalentClass ?eqc .
+        ?eqc a owl:Class .
+        ?eqc owl:intersectionOf ?intersection .
+        ?intersection (owl:intersectionOf|rdf:first|rdf:rest)* ?restriction .
+        ?restriction a owl:Restriction ;
+                     owl:onProperty ?onProp ;
+                     owl:someValuesFrom ?valSource .
+        #        # rdf:nil
+    }
+} 
+#rdf:type 7336
+#owl:intersectionOf 77325
+#owl:unionOf 11
+```
+
+
 - OneNote
 - GitHub
 - local files
@@ -61,7 +90,7 @@ $ ls *.R -lSrh
 ```R
 [3] "http://example.com/resource/diseaseDepth"  
 ```
-Executed with `https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/dist_from_MonDO_disease_root.R`... make sure this still works with the same configuration yaml file as `disease_diagnosis_dev`
+Implemented by `https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/dist_from_MonDO_disease_root.R`... make sure this still works with the same configuration yaml file as `disease_diagnosis_dev`
 
 ```R                      
 [5] "http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings"                                  
