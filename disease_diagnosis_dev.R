@@ -337,7 +337,9 @@ last.post.time <- Sys.time()
 
 # or just do it as a sparql update
 
-last.post.status <- update.statement <- "clear all"
+last.post.status <- ''
+
+update.statement <- "clear all"
 
 sparql.result <-
   SPARQL(
@@ -519,6 +521,8 @@ expectation <-
   )
 
 monitor.named.graphs()
+
+# ~ 5 minutes
 
 ###   ###   ###
 
@@ -999,6 +1003,22 @@ where {
 }'
 )
 
+update.list <- list('forward reverse graph names' = '
+insert data {
+    graph mydata:AssertionOrientations {
+        mydata:rewrites_MonDO_object rdfs:label "reverse" .
+        mydata:rewrites_MonDO_subject rdfs:label "forward" .
+    }
+}')
+
+update.list <- list('forward reverse graph names' = '
+insert data {
+    graph mydata:AssertionOrientations {
+        mydata:rewrites_MonDO_object rdfs:label "reverse" .
+        mydata:rewrites_MonDO_subject rdfs:label "forward" .
+    }
+}')
+
 update.names <- names(update.list)
 
 # rewrite statements with consistent orientation
@@ -1021,6 +1041,7 @@ update.outer.result <-
     }
   })
 
+# ~ 5 minutes
 
 if (delete.isolated.flag) {
   post.res <- POST(

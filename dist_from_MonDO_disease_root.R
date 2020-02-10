@@ -9,7 +9,16 @@ library(stringr)
 
 options(java.parameters = "- Xmx6g")
 
-config.yaml.file <- "dd_on_pmacs.yaml"
+# config.yaml.file <- "dd_on_pmacs.yaml"
+# 
+# config.bootstrap <-
+#   config::get(file = config.yaml.file)
+# 
+# selected.gdb.configuration <-
+#   config::get(config = config.bootstrap$selected.gdb.configuration,
+#               file = config.yaml.file)
+
+config.yaml.file <- "disease_diagnosis.yaml"
 
 config.bootstrap <-
   config::get(file = config.yaml.file)
