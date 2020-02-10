@@ -30,7 +30,7 @@ insert data {
 [2] "http://example.com/resource/MondoTransitiveSimpleScoEqcAxioms"                                                                                   
 [4] "http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms"
 ```
-Look for separate script or SPARQL snippet. These are probably refinements of `http://example.com/resource/materializedSimpleMondoAxioms`
+Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquivalenceAxioms` is a supplement to `http://example.com/resource/materializedSimpleMondoAxioms`, and ...`MondoTransitiveSimpleScoEqcAxioms` applies the axiom materializations (including rare, syndromic, congenital...) to disease subclasses.
 
 ```R
 [3] "http://example.com/resource/diseaseDepth"  
