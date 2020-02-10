@@ -39,6 +39,21 @@ Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquiv
     - md
     - rq / sparql
 
+```Bash
+Mark Miller@DESKTOP-LA54B7U MINGW64 ~/disease_to_diagnosis_code (master)
+$ ls *.R -lSrh
+-rw-r--r-- 1 Mark Miller 197121  398 Jan 16 16:55 matrix_entropy.R
+-rw-r--r-- 1 Mark Miller 197121 3.0K Dec 10 15:16 labeled_axiom_counts.R
+-rw-r--r-- 1 Mark Miller 197121 3.9K Dec 11 15:10 turbo_graphdb_setup.R
+-rw-r--r-- 1 Mark Miller 197121 4.4K Dec 11 15:10 deltas.R
+-rw-r--r-- 1 Mark Miller 197121 4.5K Dec 11 15:10 notation_to_term.R
+-rw-r--r-- 1 Mark Miller 197121 6.7K Dec  9 09:29 simple_mondo_axiom_list.R
+-rw-r--r-- 1 Mark Miller 197121  13K Dec 10 15:16 dd_batched_values_reverse.R
+-rw-r--r-- 1 Mark Miller 197121  15K Dec 10 15:16 dd_batched_values_reconcile.R
+-rw-r--r-- 1 Mark Miller 197121  19K Dec 11 15:10 dd_batched_values.R
+-rw-r--r-- 1 Mark Miller 197121  34K Dec  9 09:29 disease_diagnosis_dev.R
+```
+
 
 ```R
 [3] "http://example.com/resource/diseaseDepth"  
