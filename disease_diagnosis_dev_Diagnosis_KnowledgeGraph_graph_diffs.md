@@ -44,4 +44,4 @@ Executed with `https://github.com/PennTURBO/disease_to_diagnosis_code/blob/maste
 [8] "http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm"
 ```
 
-See Hayden, es. for `http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm` 
+See Hayden, esp. for `http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm` 
