@@ -30,6 +30,9 @@ insert data {
 [2] "http://example.com/resource/MondoTransitiveSimpleScoEqcAxioms"                                                                                   
 [4] "http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms"
 ```
+
+materializedVerySimpleMondoEquivalenceAxioms: 6849
+
 Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquivalenceAxioms` is a supplement to `http://example.com/resource/materializedSimpleMondoAxioms`, and ...`MondoTransitiveSimpleScoEqcAxioms` applies the axiom materializations (including rare, syndromic, congenital...) to disease subclasses.
 
 - OneNote
