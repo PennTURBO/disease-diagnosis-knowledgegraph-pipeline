@@ -35,13 +35,13 @@ Look for separate script or SPARQL snippet ....`materializedVerySimpleMondoEquiv
 ```R
 [3] "http://example.com/resource/diseaseDepth"  
 ```
-Look for separate script or SPARQL snippet
+Executed with `https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/dist_from_MonDO_disease_root.R`... make sure this still works with the same configuration yaml file as `disease_diagnosis_dev`
 
 ```R                      
 [5] "http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings"                                  
 [6] "http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings_LEAFONLY"                         
 [7] "http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings_depthTimesMappingCountFormulaOnly"
-[8] "http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm
+[8] "http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm"
 ```
 
-See Hayden
+See Hayden, es. for `http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm` 
