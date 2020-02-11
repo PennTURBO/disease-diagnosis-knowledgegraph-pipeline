@@ -1,29 +1,37 @@
+# rrdf apparently not necessary,
+# and depended on rJava anyway,
+# which is working from the R command line interpreter
+# but not RStudio on Mark's new MacBook
+
+# options(java.parameters = "- Xmx6g")
+
+library(igraph)
+# library(rrdf)
+library(stringr)
+
+# options(java.parameters = "- Xmx6g")
+
 library(config)
 library(SPARQL)
 
 library(httr)
 library(jsonlite)
 
-### revision log
-# switched to yaml config
-# refactored monitor.named.graphs into a function
-
 # SNOMEDCT or SNOMEDCT_US?
-# UMLS uses "SNOMEDCT_US" as their source abbrevation, adn that's what umls2rdf URIs use
-
-# apply SPARQL updates over labels, not the queries themselves? (DONE?)
+# UMLS uses "SNOMEDCT_US" as their source abbrevation, and that's what umls2rdf URIs use
 
 # continue re-factoring SPARQL prefixes
 
 ###
 
-# could have used: jsonlite? rjsonio? rjson?
-# slight differences in the returned structure
-# need to match with monitoring/expectation code
+# could have used veriuos JSON parsers: jsonlite? rjsonio? rjson?
+# they have slight differences in the data structures returned by fromJson
+# therefore need to match with monitoring/expectation code
 
-# includes example of pure SPARQL::SPARQL update with authentication
+# running SPARQL agaisnt a password protected graphdb repo takes soem extra work
+# this script includes an example of pure SPARQL::SPARQL update with authentication
 
-# what's an example of scripts that do use yaml and named graph monitoring function?
+# what's an example of of another script that do uses yaml and a named graph monitoring function?
 #   tweencorn on http://pennturbo.org:8787/?
 # see also
 #   https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/populate_disease_to_diagnosis_code_repo.R
@@ -32,9 +40,7 @@ library(jsonlite)
 #     5440382 on Aug 12, 2019
 ###
 
-# continue re-factoring SPARQL prefixes
-
-# maybe
+# maybe...
 # materialize all of the paths and then flatten for Hayden
 # filter out rare diseases, syndromes or congenital conditions from mondo
 # haven't put SNOMEDCT filtering into production yet
@@ -42,7 +48,6 @@ library(jsonlite)
 # materialize SNOMEDCT's icd10 text mappings? they might just be the same as shared CUIs?
 
 ###
-
 
 # start by loading
 # snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT_US/
@@ -949,6 +954,27 @@ where {
     }
 }
 #limit 99',
+"materializedVerySimpleMondoEquivalenceAxioms" = '
+insert {
+    graph <http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms> {
+        ?d ?onProp ?valSource .
+    }
+}
+where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?d owl:equivalentClass ?eqc .
+        ?eqc a owl:Class .
+        ?eqc owl:intersectionOf ?intersection .
+        ?intersection (owl:intersectionOf|rdf:first|rdf:rest)* ?restriction .
+        ?restriction a owl:Restriction ;
+                     owl:onProperty ?onProp ;
+                     owl:someValuesFrom ?valSource .
+        #        # rdf:nil
+    }
+}
+#rdf:type 7336
+#owl:intersectionOf 77325
+#owl:unionOf 11',
 "ICD9DiseaseInjuryTransitiveSubClasses" = 'insert {
     graph mydata:ICD9DiseaseInjuryTransitiveSubClasses {
       ?sub rdfs:subClassOf ?s .
@@ -1000,24 +1026,42 @@ where {
     #         ?mondoSub obo:RO_0002573 obo:MONDO_0021152 .
     #     }
     # }
+}',
+'MondoTransitiveSimpleScoEqcAxioms' = '
+insert {
+    graph <http://example.com/resource/MondoTransitiveSimpleScoEqcAxioms> {
+        ?s ?p ?o
+    }
+}
+where {
+    graph <http://example.com/resource/MondoTransitiveSubClasses> {
+        ?s rdfs:subClassOf ?restrictionSubject
+    }
+    {
+        {
+            graph <http://example.com/resource/materializedSimpleMondoAxioms> {
+                ?restrictionSubject ?p ?o
+            }
+        }
+        union
+        {
+            graph <http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms> {
+                ?restrictionSubject ?p ?o
+            }
+        }
+    }
+    #    filter( ?restrictionSubject != ?inferee )
+}
+#limit 100
+# contaminated with statements like rdfs:subClassOf rdfs:subClassOf rdfs:subClassOf',
+'forward reverse graph names' = '
+insert data {
+    graph mydata:AssertionOrientations {
+        mydata:rewrites_MonDO_object rdfs:label "reverse" .
+        mydata:rewrites_MonDO_subject rdfs:label "forward" .
+    }
 }'
 )
-
-update.list <- list('forward reverse graph names' = '
-insert data {
-    graph mydata:AssertionOrientations {
-        mydata:rewrites_MonDO_object rdfs:label "reverse" .
-        mydata:rewrites_MonDO_subject rdfs:label "forward" .
-    }
-}')
-
-update.list <- list('forward reverse graph names' = '
-insert data {
-    graph mydata:AssertionOrientations {
-        mydata:rewrites_MonDO_object rdfs:label "reverse" .
-        mydata:rewrites_MonDO_subject rdfs:label "forward" .
-    }
-}')
 
 update.names <- names(update.list)
 
@@ -1110,3 +1154,139 @@ if (delete.isolated.flag) {
 
 
 ###   ###   ###
+
+my.query <- '
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+prefix mydata: <http://example.com/resource/>
+PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+select ?sid ?oid where {
+    graph <http://purl.obolibrary.org/obo/mondo.owl> {
+        ?s rdfs:subClassOf ?o .
+    }
+    graph obo:mondo.owl {
+        ?s oboInOwl:id ?sid .
+        ?o oboInOwl:id ?oid .
+    }
+}'
+
+
+result.list <-
+  SPARQL(
+    url = select.endpoint ,
+    query = my.query ,
+    curl_args = list(
+      userpwd = paste0(api.user, ":", api.pass),
+      httpauth = 1
+      # 'Accept-Encoding' = 'gzip, deflate'
+    )
+  )
+
+result.frame <- result.list$results
+
+mrg <- igraph::graph_from_data_frame(result.frame)
+
+mrg.dists <- t(shortest.paths(graph = mrg, v = "MONDO:0000001"))
+mrg.dists <- as.data.frame(mrg.dists)
+mrg.dists$MonDO.term <- rownames(mrg.dists)
+mrg.dists <- mrg.dists[is.finite(mrg.dists$`MONDO:0000001`),]
+
+mrg.dists <- mrg.dists[order(mrg.dists$MonDO.term), ]
+
+
+mrg.dists$disease.uri <-
+  sub(pattern = "^MONDO:",
+      replacement = "obo:MONDO_",
+      x = mrg.dists$MonDO.term)
+
+mrg.dists$mrg.composed <-
+  paste0(mrg.dists$disease.uri,
+         " mydata:diseaseDepth ",
+         mrg.dists$`MONDO:0000001`,
+         " . ")
+
+
+chunk.size <- 100
+composed.chunks <-
+  split(mrg.dists$mrg.composed, ceiling(seq_along(mrg.dists$mrg.composed) /
+                                          chunk.size))
+
+chunked.template <- '
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX mydata: <http://example.com/resource/>
+insert data {
+    graph mydata:diseaseDepth {
+${payload}
+    }
+}'
+
+placeholder <- lapply(composed.chunks, function(current.chunk) {
+  payload <- paste0(current.chunk, collapse = " ")
+  
+  interpreted <- stringr::str_interp(chunked.template)
+  
+  post.res <- POST(update.endpoint,
+                   body = list(update = interpreted),
+                   saved.authentication)
+  
+})
+
+my.query <- '
+select distinct (str(?g) as ?V1)
+where {
+graph ?g {
+?s ?p ?o }}'
+
+
+result.list <-
+  SPARQL(
+    url = select.endpoint ,
+    query = my.query ,
+    curl_args = list(
+      userpwd = paste0(api.user, ":", api.pass),
+      httpauth = 1
+      # 'Accept-Encoding' = 'gzip, deflate'
+    )
+  )
+
+disease_diagnosis_dev <- t(result.list$results)
+
+toread <- "
+http://example.com/resource/AssertionOrientations
+http://example.com/resource/ICD10TransitiveSubClasses
+http://example.com/resource/ICD9DiseaseInjuryTransitiveSubClasses
+http://example.com/resource/MondoTransitiveSimpleScoEqcAxioms
+http://example.com/resource/MondoTransitiveSubClasses
+http://example.com/resource/SnomedDiseaseTransitiveSubClasses
+http://example.com/resource/definedIn
+http://example.com/resource/diseaseDepth
+http://example.com/resource/icd9range
+http://example.com/resource/materializedCui
+http://example.com/resource/materializedSimpleMondoAxioms
+http://example.com/resource/materializedVerySimpleMondoEquivalenceAxioms
+http://example.com/resource/rewrites_MonDO_object
+http://example.com/resource/rewrites_MonDO_subject
+http://purl.bioontology.org/ontology/ICD10CM/
+http://purl.bioontology.org/ontology/ICD9CM/
+http://purl.bioontology.org/ontology/SNOMEDCT_US/
+http://purl.bioontology.org/ontology/STY/
+http://purl.obolibrary.org/obo/mondo.owl
+http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings
+http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings_LEAFONLY
+http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings_depthTimesMappingCountFormulaOnly
+http://www.itmat.upenn.edu/biobank/countIcdMappingsPerMondoTerm
+https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html"
+
+Diagnosis_KnowledgeGraph  <-
+  read.table(textConnection(toread), FALSE, stringsAsFactors = FALSE)
+closeAllConnections()
+
+disease_diagnosis_dev_only <-
+  setdiff(disease_diagnosis_dev[, 1], Diagnosis_KnowledgeGraph$V1)
+
+Diagnosis_KnowledgeGraph_only <-
+  setdiff(Diagnosis_KnowledgeGraph$V1, disease_diagnosis_dev[, 1])
+
+print(disease_diagnosis_dev_only)
+
+print(Diagnosis_KnowledgeGraph_only)

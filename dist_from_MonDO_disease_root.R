@@ -1,13 +1,13 @@
-options(java.parameters = "- Xmx6g")
+# options(java.parameters = "- Xmx6g")
 
 library(SPARQL)
 library(config)
 library(httr)
 library(igraph)
-library(rrdf)
+# library(rrdf)
 library(stringr)
 
-options(java.parameters = "- Xmx6g")
+# options(java.parameters = "- Xmx6g")
 
 # config.yaml.file <- "dd_on_pmacs.yaml"
 # 
