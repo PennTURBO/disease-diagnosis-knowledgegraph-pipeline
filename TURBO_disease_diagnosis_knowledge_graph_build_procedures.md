@@ -1,12 +1,14 @@
-# Building TURBO disease diagnosis knowledge graph
+# Building a TURBO disease/diagnosis knowledge graph
 
 
 
-## Background and Prerequisites 
+## Background
 
 A knowledge graph with normalized paths from MonDO disease classes to ICD code terms can be inserted into a GraphDB triple store by running:
 
 https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R
+
+## Prerequisites 
 
 **Running the script requires a GraphDB triplestore server** from Ontotext (https://www.ontotext.com/products/graphdb/). Very similar scripts have been run with the free edition, using versions back to late 8.x. The most recent build was executed with a trial version of GraphDB Enterprise Edition 9.1.1, running under Oracle Java 11.0.6. Networking concerns like firewalls and VPNs are left to the reader.
 
@@ -120,11 +122,16 @@ One configuration file can be loaded with the specifications for multiple differ
 
 The terms `api.user` and `api.pass` refer to a GraphDB user with permission to write in the disease diagnosis repository, along with that user's password.
 
-**The configuration file provides the names of two RDF files that must be present in the GraphDB server's import directory.** The location of that directory can be determined by visiting `http://graphdb_server.domain:port/import#server` and clicking on the "? Help" button in the upper right. The default port is 7200.
+**The configuration file provides the names of two RDF files that must be present in the GraphDB server's import directory.** 
+
+- `icd9_to_snomed.triples.file`
+- `snomed.triples.file`
+
+The location of the GraphDB import directory can be determined by visiting `http://graphdb_server.domain:port/import#server` and clicking on the "? Help" button in the upper right. The default port is 7200. It can also be detemined by examining the  `<graphdb-distribution>/conf/graphdb.properties` file, understanding that most of the settings will be undefined and therefore set to implicit defaults.
 
 **`icd9_to_snomed.triples.file`** should be set to the name of a file containing an RDF direct mapping of the ICD9/SNOMED relations available in https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip. A UMLS account is required to obtain the ICD9/SNOMED mappings. See https://uts.nlm.nih.gov//license.html
 
-This RDF direct mappings only need to be created once, and any one of several approaches could be used, as long as they use the predicates expected by  `disease_diagnosis_dev.R`. Up to now, GraphDB's OntoRefine feature has been used (http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html). OntoRefine's default settings can be used to load the two CSV files from `ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
+These ICD9/SNOMED RDF direct mappings only need to be created once, and any one of several approaches could be used, as long as they use the predicates expected by  `disease_diagnosis_dev.R`. Up to now, GraphDB's OntoRefine feature has been used (http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html). OntoRefine's default settings can be used to load the two CSV files from `ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
 
 
 
@@ -194,6 +201,28 @@ insert {
 The direct mapping should be performed outside of the disease diagnosis repository, and the direct mappings repository should then be exported to a turtle file and placed in the GraphDB's import folder. (See above.) The export can be performed in the web interface or programmatically.
 
 http://graphdb.ontotext.com/documentation/free/backing-up-and-recovering-repo.html
+
+**`snomed.triples.file`** should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
+
+- connect to the UMLS servers (via a web interface or via REST). Requires a UMLS account.
+- download the UMLS distribution
+- unpack the UMLS archive into RRF files (and possibly subset them) with the bundled MetaMorhoSys tool
+- run a Bash script to load the RRF files into a MySQL database
+- run the umls2rdf Python script to dump the MySQL contents to RDF
+
+Each of those steps are somewhat complex in their own right. There is ample web documentation for the main phases
+
+- Unpacking with MetaMorphoSys
+  - GUI: https://www.ncbi.nlm.nih.gov/books/NBK9683/
+  - command line: https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html
+- Loading into MySQL: https://www.nlm.nih.gov/research/umls/implementation_resources/scripts/README_RRF_MySQL_Output_Stream.html
+- Dumping to RDF with umls2rdf: https://github.com/ncbo/umls2rdf
+
+But little of that documentation is complete or throughly up to date. For example, dependencies like installing MySQL or obtaining Python libraries are not addressed.
+
+Building the SNOMED RDF takes lots of disk space and RAM (100 GB+).
+
+More rough documentation for generating SNOMED RDF can be found at https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev_inc_prep.md
 
 
 

@@ -21,6 +21,7 @@ library(SPARQL)
 # see also notes about rrdf above
 # SPARQL imports at least RCurl
 
+# no longer necessary? see also rrdf
 # library(jsonlite)
 # library(stringr)
 
@@ -64,6 +65,7 @@ library(SPARQL)
 # mondo from http://purl.obolibrary.org/obo/mondo.owl into http://purl.obolibrary.org/obo/mondo.owl
 #   may have to be staged as a file? GraphDB complains about loading some RDF files from web URLs
 #   OK, just check the redirection path for the obolibrary URL and state that its RDF/XML formatted?
+
 # ontorefine instantation of
 #   https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip
 #   from server graphdb-import folder
@@ -169,21 +171,35 @@ library(SPARQL)
 
 ###
 
+args  <-  commandArgs(trailingOnly=TRUE)
+# print(args)
+# print(file.exists(args[1]))
+# print(getwd())
+
+potential.config.file <- args[1]
+if (file.exists(potential.config.file)) {
+  # if run from command line with Rscript like
+  # `Rscript <script path>/disease_diagnosis_dev.R <config file path>
+  # and <config file path> exists
+  # VALIDITY OF FILE IS NOT CHECKED
+  actual.config.file <- potential.config.file
+} else {
+  # current working directory
+  actual.config.file <- "disease_diagnosis.yaml"
+}
+
 config.bootstrap <-
-  config::get(file = "disease_diagnosis.yaml")
+  config::get(file = actual.config.file)
 
 selected.gdb.configuration <-
   config::get(config = config.bootstrap$selected.gdb.configuration,
-              file = "disease_diagnosis.yaml")
+              file = actual.config.file)
 
 monitor.pause.seconds <- config.bootstrap$monitor.pause.seconds
 snomed.triples.file <-
   selected.gdb.configuration$snomed.triples.file
 icd9_to_snomed.triples.file <-
   selected.gdb.configuration$icd9_to_snomed.triples.file
-
-# does this ever get used?
-bp.api.key <- config.bootstrap$bp.api.key
 
 graphdb.address.port <-
   selected.gdb.configuration$graphdb.address.port
