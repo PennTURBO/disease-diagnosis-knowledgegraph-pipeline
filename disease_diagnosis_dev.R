@@ -1,24 +1,32 @@
-# rrdf apparently not necessary,
-# and depended on rJava anyway,
-# which is working from the R command line interpreter
-# but not RStudio on Mark's new MacBook
-
 # options(java.parameters = "- Xmx6g")
+# # library(rrdf)
+# # options(java.parameters = "- Xmx6g")
+
+# rrdf apparently not necessary,
+# and depends on rJava anyway,
+# which is working from the R command line interpreter
+# but not in RStudio on Mark's new MacBook
+
+# not sure whether the rJava memory allocation should come before or after the rJvaa import
 
 library(igraph)
-# library(rrdf)
-library(stringr)
-
-# options(java.parameters = "- Xmx6g")
+library(httr)
 
 library(config)
-library(SPARQL)
+# called explicitly to avoid confusion with get methods from other libraries
 
-library(httr)
-library(jsonlite)
+library(SPARQL)
+# some interactions with the triplestore, esp. select queries, seem more convenient via the SPARQL library
+# others, like updates, seem more convenient with lower level GETs/PUTs from httr or RCurl
+# see also notes about rrdf above
+# SPARQL imports at least RCurl
+
+# library(jsonlite)
+# library(stringr)
+
 
 # SNOMEDCT or SNOMEDCT_US?
-# UMLS uses "SNOMEDCT_US" as their source abbrevation, and that's what umls2rdf URIs use
+# UMLS uses "SNOMEDCT_US" as their source abbreviation, and that's what umls2rdf URIs use
 
 # continue re-factoring SPARQL prefixes
 
@@ -28,7 +36,7 @@ library(jsonlite)
 # they have slight differences in the data structures returned by fromJson
 # therefore need to match with monitoring/expectation code
 
-# running SPARQL agaisnt a password protected graphdb repo takes soem extra work
+# running SPARQL against a password protected graphdb repo takes some extra work
 # this script includes an example of pure SPARQL::SPARQL update with authentication
 
 # what's an example of of another script that do uses yaml and a named graph monitoring function?
@@ -137,7 +145,7 @@ library(jsonlite)
 # they're working on one, and currently provide a Perl script
 # https://confluence.ihtsdotools.org/display/DOCTSG/9.2.6+SNOMED+CT+OWL+Distribution+FAQ
 
-# version predictes:
+# version predicates:
 # subject	predicate	object	context
 # http://purl.bioontology.org/ontology/ICD10CM/ 	owl:versionInfo 	2019aa	http://purl.bioontology.org/ontology/ICD10CM/
 # http://purl.bioontology.org/ontology/ICD9CM/ 	owl:versionInfo 	2019aa	http://purl.bioontology.org/ontology/ICD9CM/
@@ -1184,7 +1192,7 @@ result.list <-
 
 result.frame <- result.list$results
 
-mrg <- igraph::graph_from_data_frame(result.frame)
+mrg <- graph_from_data_frame(result.frame)
 
 mrg.dists <- t(shortest.paths(graph = mrg, v = "MONDO:0000001"))
 mrg.dists <- as.data.frame(mrg.dists)
@@ -1287,6 +1295,9 @@ disease_diagnosis_dev_only <-
 Diagnosis_KnowledgeGraph_only <-
   setdiff(Diagnosis_KnowledgeGraph$V1, disease_diagnosis_dev[, 1])
 
+# these were retained so that the transformations in this script wouldn't be completely destructive
+# it's ok that they don't appear in the production disease diagnosis graph
 print(disease_diagnosis_dev_only)
 
+# these are created by Hayden's scripts
 print(Diagnosis_KnowledgeGraph_only)
