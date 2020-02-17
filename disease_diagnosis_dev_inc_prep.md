@@ -20,7 +20,7 @@ _New SHA256 password encryption? Selected old password encryption for compatibil
 
 _With a freshly created MySQL server, it will be necessary to create a new destination database and a user. I have been doing `GRANT ALL PRIVILEGES ON umls.* TO 'umls' @'%';`, but one could argue for granting fewer privileges._
 
-_It will probably be necessary to set local_infile=1 in a configuration file like `/etc/my.cnf`_
+_It will probably be necessary to set `local_infile=1` in a configuration file like `/etc/my.cnf`_
 
 ### Sample UMLS sources
 
