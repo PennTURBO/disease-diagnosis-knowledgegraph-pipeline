@@ -109,7 +109,7 @@ See the `README.txt` file
 Requires a UMLS account. Hard-code credentials(?!) into `curl-uts-download.sh`
 
 ```BASH
-$ wget curl-uts-download.sh https://download.nlm.nih.gov/umls/kss/2019AB/umls-2019AB-full.zip
+$ sh curl-uts-download.sh https://download.nlm.nih.gov/umls/kss/2019AB/umls-2019AB-full.zip
 $ unzip umls-2019AB-full.zip
 $ cd 2019AB-full/
 $ unzip mmsys.zip
