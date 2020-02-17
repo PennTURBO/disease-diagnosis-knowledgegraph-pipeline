@@ -16,7 +16,9 @@ _Currently trying MySQL on MacOS: https://dev.mysql.com/get/Downloads/MySQL-8.0/
 
 _MariaDB on MacOS requires use of homebrew?_
 
-_New SHA256 password encryption? Selected old passwrod encryption for compativility with MySQL 5.x clients._
+_New SHA256 password encryption? Selected old password encryption for compatibility with MySQL 5.x clients._
+
+_With a freshly created MySQL server, it will be necessary to create a new destination database and a user. I have been doing `GRANT ALL PRIVILEGES ON umls.* TO 'umls' @'%';`, but one could argue for granting fewer privileges._
 
 _It will probably be necessary to set local_infile=1 in a configuration file like `/etc/my.cnf`_
 
