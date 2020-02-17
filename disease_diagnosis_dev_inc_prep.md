@@ -18,6 +18,8 @@ _MariaDB on MacOS requires use of homebrew?_
 
 _New SHA256 password encryption? Selected old passwrod encryption for compativility with MySQL 5.x clients._
 
+_It will probably be necessary to set local_infile=1 in a configuration file like `/etc/my.cnf`_
+
 ### Sample UMLS sources
 
 - See [UMLS Metathesaurus Vocabulary Documentation(https://www.nlm.nih.gov/research/umls/sourcereleasedocs/index.html)
