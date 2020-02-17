@@ -115,6 +115,11 @@ $ cd 2019AB-full/
 $ unzip mmsys.zip
 ```
 
+### Linux command line? Use [BatchMetaMorphoSys](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html)
+### Mac? Might as well use graphical MetaMorphoSys
+### Windows? Can use graphical MetaMorphoSys
+#### but subsequent MySQL and umls2rdf steps might be awkward
+
 Follow the directions [BatchMetaMorphoSys](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html) to create _RRF_ files from the desired UMLS sources.
 
 `cat` the BatchMetaMorphoSys bash script to `metamorphosys_batch.sh` and edit. For example:
