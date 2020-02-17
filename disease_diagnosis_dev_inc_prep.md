@@ -115,7 +115,7 @@ $ cd 2019AB-full/
 $ unzip mmsys.zip
 ```
 
-Follow the directions [BatchMetaMorphoSys](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html) directions to create _RRF_ files from the desired UMLS sources.
+Follow the directions [BatchMetaMorphoSys](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html) to create _RRF_ files from the desired UMLS sources.
 
 `cat` the BatchMetaMorphoSys bash script to `metamorphosys_batch.sh` and edit. For example:
 
