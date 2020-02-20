@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  graphdb:
+    build:
+      context: .
+      dockerfile: docker/graphdb/Dockerfile
+    tty: true
+    stdin_open: true
+    ports: 
+      - "7200:7200"
+    #volumes:
+    #  - "./config:/config"
+
+
+  builder:
+    build:
+      context: .
+      dockerfile: docker/builder/Dockerfile
+    tty: true
+    stdin_open: true
+    depends_on:
+      - graphdb
+
