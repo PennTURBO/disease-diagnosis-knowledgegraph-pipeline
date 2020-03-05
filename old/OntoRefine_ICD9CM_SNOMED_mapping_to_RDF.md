@@ -1,6 +1,4 @@
-**`icd9_to_snomed.triples.file`** should be set to the name of a file containing an RDF direct mapping of the ICD9/SNOMED relations available in https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip. See https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html for documentatio. **Contrary to recent claims, these mappings are updated (yearly), and the disease diagnosis workflow should ahve a method for regenreating them in an automated fashio.** A UMLS account is required to obtain the ICD9/SNOMED mappings. See https://uts.nlm.nih.gov//license.html
-
-These ICD9/SNOMED RDF direct mappings only need to be created once, and any one of several approaches could be used, as long as they use the predicates expected by  `disease_diagnosis_dev.R`. Up to now, GraphDB's OntoRefine feature has been used (http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html). OntoRefine's default settings can be used to load the two CSV files from `ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
+TURBOs direct-mapped RDF version of the NLM's ICD9CM/SNOMED RDF mappings only should be recreated anually, and any one of several approaches could be used, as long as they use the predicates expected by  `disease_diagnosis_dev.R`. Historically, GraphDB's point-and-click [OntoRefine](http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html) feature was been used. OntoRefine's default settings can be used to load the two CSV files from an archive like`ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
 
 
 
@@ -67,6 +65,4 @@ insert {
 }'
 ```
 
-The direct mapping should be performed outside of the disease diagnosis repository, and the direct mappings repository should then be exported to a turtle file and placed in the GraphDB's import folder. (See above.) The export can be performed in the web interface or programmatically.
-
-http://graphdb.ontotext.com/documentation/free/backing-up-and-recovering-repo.html
+The direct mapping should be performed outside of the disease diagnosis repository, [and the direct mappings repository should then be exported to a turtle file and placed in the GraphDB's import folder.](http://graphdb.ontotext.com/documentation/free/backing-up-and-recovering-repo.html)
