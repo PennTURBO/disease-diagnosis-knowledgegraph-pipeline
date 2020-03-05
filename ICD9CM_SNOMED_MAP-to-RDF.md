@@ -6,7 +6,7 @@ The portions of this workflow that are not completely automated yet include esta
 
 Some other method could be used to load the tabular ICD-9 to SNOMED mapping into Neo4J or GraphDB, as long as the triples use the same type, predicates, `xsd:datatype`s, and graph context as the triples described here.
 
-OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapping, but legacy instructions for interactively using OntoRefine are still available.
+OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapping, but [legacy instructions for interactively using OntoRefine are still available](old/OntoRefine_ICD9CM_SNOMED_mapping_to_RDF.md).
 
 - Download the latest SNOMED-ICD9 mappings from the command line with `curl-uts-download.sh` 
 
