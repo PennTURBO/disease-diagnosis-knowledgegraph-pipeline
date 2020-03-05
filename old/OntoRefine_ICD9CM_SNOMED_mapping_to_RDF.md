@@ -1,6 +1,4 @@
-TURBOs direct-mapped RDF version of the NLM's ICD9CM/SNOMED RDF mappings only should be recreated anually, and any one of several approaches could be used, as long as they use the predicates expected by  `disease_diagnosis_dev.R`. Historically, GraphDB's point-and-click [OntoRefine](http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html) feature was been used. OntoRefine's default settings can be used to load the two CSV files from an archive like`ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
-
-
+TURBOs direct-mapped RDF version of the NLM's ICD9CM/SNOMED RDF mappings should be recreated anually, and any one of several approaches could be used, as long as they use the predicates expected by `disease_diagnosis_dev.R`. Historically, GraphDB's point-and-click [OntoRefine](http://graphdb.ontotext.com/documentation/free/loading-data-using-ontorefine.html) feature has been been used. OntoRefine's default settings can be used to load the two CSV files from an archive like`ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip` into two different OntoRefine projects. The following SPARQL could then be run over each of the two projects to load the direct mappings into one named graph. 
 
 ```SPARQL
 PREFIX mydata: <http://example.com/resource/>
