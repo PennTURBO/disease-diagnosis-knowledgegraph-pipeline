@@ -45,6 +45,4 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
     - The script will run for roughly 15 minutes without any progress indication.
 - Finally, load the RDF file into the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease to diagnosis repository. 
 
-`curl --data @ICD9CM_SNOMED_MAP.ttl \
-http://server:port/repositories/disease_diagnosis_dev/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html \
--H 'Content-Type:text/turtle'`
+`curl --data @ICD9CM_SNOMED_MAP.ttl http://server:port/repositories/disease_diagnosis_dev/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html -H 'Content-Type:text/turtle'`
