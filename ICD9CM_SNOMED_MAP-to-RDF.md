@@ -16,11 +16,23 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 
 - See the README.txt file
 
-- Hard-code the UMLS credentials into `curl-uts-download.sh` (or figure out a more secure alternative!)
-
+- There are lines in `curl-uts-download.sh` where the user can hard-code their UMLS credentials.
+    - `export UTS_USERNAME=`
+    - `export UTS_PASSWORD=`
+    
+- A safer practice _might_ be commenting out those lines and exporting the assignments in the shell, with history temporarily 
+    - `export UTS_USERNAME=<SECRET>;history -d $(history 1)`
+    - `export UTS_PASSWORD=<SECRET>;history -d $(history 1)`
+    
 - Browse to https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html to determine the latest mapping file name, or write a script to scrape it. I don't believe you can even view the landing page without authenticating first. Perhaps the whole authentication, latest-file-identification and download process could be written into some TURBO/Drivetrain method.
 
 `$ sh curl-uts-download.sh https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip`
+
+- Even if the authenticaion and downlaod were successful, the script will spew out some HTML. SOmething like
+
+> You have been successfully logged out of the UMLS Terminology Services.
+
+is expected. You can examine the HTML more closely if desired. If ou get a roughly 1 MB zip file, your download was probably successfu.
 
 - Unzip the download to obtain two tab delimited data files like
 
