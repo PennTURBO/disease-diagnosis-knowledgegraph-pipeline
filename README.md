@@ -1,7 +1,5 @@
 # Building a TURBO disease/diagnosis knowledge graph
 
-
-
 ## Background
 
 A knowledge graph with normalized paths from MonDO disease classes to ICD code terms can be inserted into a GraphDB triple store by running:
@@ -127,9 +125,9 @@ The terms `api.user` and `api.pass` refer to a GraphDB user with permission to w
 - `icd9_to_snomed.triples.file`
 - `snomed.triples.file`
 
-The location of the GraphDB import directory can be determined by visiting `http://graphdb_server.domain:port/import#server` and clicking on the "? Help" button in the upper right. The default port is 7200. It can also be detemined by examining the  `<graphdb-distribution>/conf/graphdb.properties` file, understanding that most of the settings will be undefined and therefore set to implicit defaults.
+The location of the GraphDB import directory can be determined by visiting `http://graphdb_server.domain:port/import#server` and clicking on the "? Help" button in the upper right. The default port is 7200. It can also be determined by examining the  `<graphdb-distribution>/conf/graphdb.properties` file, understanding that most of the settings will be undefined and therefore set to implicit defaults.
 
-**`icd9_to_snomed.triples.file`** should be set to the path of a file containing an RDF direct mapping of the [National Library of Medicine's ICD9CM/SNOMED mappings](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html). **Contrary to recent claims, these mappings are updated (yearly), and the [disease diagnosis workflow should have a method for regenerating them in an automated fashion](ICD9CM_SNOMED_MAP-to-RDF.md).** A [UMLS license](https://uts.nlm.nih.gov/license.html) is required to obtain the tabular ICD9CM/SNOMED mappings. 
+- The **`icd9_to_snomed.triples.file`** parameter should be set to the path of a file containing an RDF direct mapping of the [National Library of Medicine's ICD9CM/SNOMED mappings](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html). **Contrary to recent claims, these mappings are updated (yearly), and the [disease diagnosis workflow includes a method for regenerating them in a mostly automated fashion](ICD9CM_SNOMED_MAP-to-RDF.md).** A [UMLS license](https://uts.nlm.nih.gov/license.html) is required to obtain the tabular ICD9CM/SNOMED mappings. 
 
 **`snomed.triples.file`** should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
 
@@ -147,7 +145,7 @@ Each of those steps are somewhat complex in their own right. There is ample web 
 - Loading into MySQL: https://www.nlm.nih.gov/research/umls/implementation_resources/scripts/README_RRF_MySQL_Output_Stream.html
 - Dumping to RDF with umls2rdf: https://github.com/ncbo/umls2rdf
 
-But little of that documentation is complete or throughly up to date. For example, dependencies like installing MySQL or obtaining Python libraries are not addressed.
+But little of that documentation is complete or thoroughly up to date. For example, dependencies like installing MySQL or obtaining Python libraries are not addressed.
 
 Building the SNOMED RDF takes lots of disk space and RAM (100 GB+).
 
