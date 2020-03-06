@@ -8,13 +8,13 @@ Some other method could be used to load the tabular ICD-9 to SNOMED mapping into
 
 OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapping, but [legacy instructions for interactively using OntoRefine are still available](old/OntoRefine_ICD9CM_SNOMED_mapping_to_RDF.md).
 
-- Download the latest SNOMED-ICD9 mappings from the command line with `curl-uts-download.sh` 
-
 - Obtain a UMLS license if you don't already have one. 
 - get the UTS (ULMS terminology services) download script 
   -  http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip
 
 - See the README.txt file
+- Download the latest SNOMED-ICD9 mappings from the command line with `curl-uts-download.sh` 
+
 
 - There are lines in `curl-uts-download.sh` where the user can hard-code their UMLS credentials.
     - `export UTS_USERNAME=`
