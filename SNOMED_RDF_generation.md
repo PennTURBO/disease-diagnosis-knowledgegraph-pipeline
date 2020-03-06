@@ -29,10 +29,9 @@ The SNOMED CT International Edition is currently released twice a year on the 31
 - Run the umls2rdf Python script to dump the MySQL contents to RDF
 
 
-
 The detailed directions below are optimized for use on a Mac or a Linux computer with a graphical desktop. The same steps could be performed on a Windows PC or a command-line-only Linux environment with a few modifications. Some of the manual steps can even be automated with the [MetaMorphoSys Batch approach](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html), although creating the required properties files in a plain text editor is complex.
 
-
+Roughly 100 GB is required for the downloaded `.zip` file, the unzipped `.nlm` files, the `.RRF` extracts created by MetaMorphoSys, and the MySQL tables. I have run the whole process on Mac with 32 GB RAM.
 
 ## Downloading a UMLS full release archive
 
@@ -41,7 +40,6 @@ The bi-annual UMLS full release can be downloaded interactively from https://www
 `$ sh curl-uts-download.sh https://download.nlm.nih.gov/umls/kss/2019AB/umls-2019AB-full.zip`
 
 UMLS releases are roughly 5 GB and will take roughly 20 minutes to download even over a fast network connection.
-
 
 
 ## MetaMorphoSys in graphical mode
@@ -68,7 +66,7 @@ UMLS releases are roughly 5 GB and will take roughly 20 minutes to download even
   - Click Done->Begin Subset from the top menu bar. You will be given an opportunity to save your configuration. A saved configuration will eliminate almost all of the previously mentioned clicks, and can even be used as a starting point for running MetaMorphoSys in batch mode in the future.
 - Performing the extraction/RRF generation will take roughly one hour.
   
-  
+----
   
 - Loading into MySQL: https://www.nlm.nih.gov/research/umls/implementation_resources/scripts/README_RRF_MySQL_Output_Stream.html
 - Dumping to RDF with umls2rdf: https://github.com/ncbo/umls2rdf
