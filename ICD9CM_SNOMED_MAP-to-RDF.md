@@ -11,7 +11,7 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 - Obtain a UMLS license if you don't already have one. 
 - Download and unzip the [UTS (ULMS terminology services) download script](http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip) 
 
-- See the README.txt file
+- See the `README.txt` file
 - There are lines in `curl-uts-download.sh` where the user can hard-code their UMLS credentials.
     - `export UTS_USERNAME=`
     - `export UTS_PASSWORD=`
