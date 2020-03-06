@@ -43,8 +43,8 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 - Use `$ Rscript ICD9CM_SNOMED_MAP-to-RDF.R` to convert the two tab delimited data files to an RDF file. 
     - Some `NAs introduced by coercion` warnings are expected
     - The script will run for roughly 15 minutes without any progress indication.
-- Finally, load the RDF file into the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease to diagnosis repository. That can certainly be done with the GraphDB workbench, and probably also with a POST to the `/repositories/{repositoryID}/rdf-graphs/{graph}` method
+- Finally, load the RDF file into the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease to diagnosis repository. 
 
-curl -X POST -H "Content-Type:application/x-turtle" -T <localfilename.ttl> \
-  http://localhost:7200/repositories/repository-id/statements
-
+`curl --data @ICD9CM_SNOMED_MAP.ttl \
+http://pennturbo.org:7200/repositories/disease_diagnosis_202003061000/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html \
+-H 'Content-Type:text/turtle'`
