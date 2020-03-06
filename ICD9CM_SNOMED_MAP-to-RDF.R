@@ -6,7 +6,7 @@ library(tibble)
 library(uuid)
 library(config)
 
-config <- config::get(file = "ICD9CM_SNOMED_MAP.yaml")
+config <- config::get(file = "ICD9CM_SNOMED_MAP-to-RDF.yaml")
 
 read.snomed.icd9.mapping <- function(mapping.path) {
   ICD9CM_SNOMED_MAP <-
