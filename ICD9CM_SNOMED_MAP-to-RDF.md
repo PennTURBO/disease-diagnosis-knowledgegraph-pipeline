@@ -46,5 +46,5 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 - Finally, load the RDF file into the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease to diagnosis repository. 
 
 `curl --data @ICD9CM_SNOMED_MAP.ttl \
-http://pennturbo.org:7200/repositories/disease_diagnosis_202003061000/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html \
+http://server:port/repositories/disease_diagnosis_dev/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html \
 -H 'Content-Type:text/turtle'`
