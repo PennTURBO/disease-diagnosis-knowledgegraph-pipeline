@@ -59,7 +59,7 @@ UMLS releases are roughly 5 GB and will take roughly 20 minutes to download even
 - Graphical Configuration
   - no changes should be needed for the source format or folder
   - no changes should be needed for the output source or folder, but the database type for "Write Database Load Scripts" should be set to "MySQL 5.6", even if you are using a different version of MySQL or MariaDB. If you are really going to use MS Access or Oracle, you should indicate that.
-  - Source list tab:  this is where you choose which knowledgebase to include in the subset/output. Clicking on a source without holding control or command will clear all other selections. Note that in the default setting, clicking on sources excludes them. 
+  - Source list tab:  this is where you choose which [UMLS knowledgebase source(s)](sample_UMLS_sources.md) to include in the subset/output. Clicking on a source without holding control or command will clear all other selections. Note that in the default setting, clicking on sources excludes them. 
     - I recommend switching to "Select sources to INCLUDE in subset" mode.
     - Then click on "US Edition of SNOMED CT ...". Other sources should become unselected.
     - MetaMorphoSys will encourage you to include the Spanish Language Edition and the Veterinary Extensions. I have been control/command clicking both to clear them.
