@@ -36,8 +36,8 @@ is expected. You can examine the HTML more closely if desired. If you get a roug
 
 - Unzip the download to obtain two tab delimited data files like
 
- 1. ICD9CM_SNOMED_MAP_1TO1_YYYMM.txt
- 2. ICD9CM_SNOMED_MAP_1TOM_YYYMM.txt 
+ 1. ICD9CM_SNOMED_MAP_1TO1_YYYMM.txt (~1 MB)
+ 2. ICD9CM_SNOMED_MAP_1TOM_YYYMM.txt (~6 MB)
 
 - Configure `ICD9CM_SNOMED_MAP.yaml` to determine where the tabular mapping files will be found and where the resulting RDF file should be written
 - Use `$ Rscript ICD9CM_SNOMED_MAP-to-RDF.R` to convert the two tab delimited data files to an RDF file. 
