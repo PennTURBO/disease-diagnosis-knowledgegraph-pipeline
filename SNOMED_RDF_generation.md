@@ -1,16 +1,10 @@
 # SNOMED RDF Generation
 
-
-
 ## Background
-
-
 
 A SNOMED RDF file is required in TURBO disease to diagnosis knowledge graphs. [IHTSD has their own SNOMED/OWL initiative](https://confluence.ihtsdotools.org/display/DOCOWL/SNOMED+CT+OWL+Guide), but TURBO knowledge graphs currently use the [NCBO's BioPortal style for the SNOMED triples](https://bioportal.bioontology.org/ontologies/SNOMEDCT). Unlike many other RDF knowledge assets at the BioPortal, the SNOMED triples are not available for download because they require end-users to agree to the SNOMED license. IHTSD does allow the NLM to redistribute [SNOMED in the Unified Medical Language System](https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/SNOMEDCT_US/index.html), since [accessing the UMLS requires obtaining a license](https://www.nlm.nih.gov/databases/umls.html#license_request).
 
 The SNOMED CT International Edition is currently released twice a year on the 31st of January and the 31st of July. The UMLS, which includes a US-localized version of SNOMED, has a `AA` version which is released in May of each year and a `AB` version in November.
-
-
 
 ## Contents
 
@@ -23,11 +17,10 @@ The SNOMED CT International Edition is currently released twice a year on the 31
 - Unzip `mmsys.zip`
 - Enjoy yet another `README.txt`
 - Use one of the shell/bash wrappers to launch MetaMorphoSys in [graphical/interactive mode](https://www.ncbi.nlm.nih.gov/books/NBK9683/) in order to convert the `.nlm` files into pipe-delimited `.RRF` (rich release format) files. *MetaMorphoSys has the capability to subset one or more knowledgebases out of UMLS. That capability should be used here to extract SNOMED alone, unless you know that you want to build RDF versions of other UMLS knowledgebases in the future.*
-  - Alternatively use [MetaMorphoSys in a batch mode](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html), which requires creating some configuration files.
+  - Alternatively use [MetaMorphoSys in a batch mode](batch_metamorphosys_notes.md), which requires creating some configuration files.
 - Deploy and/or configure a MySQL server, which will be loaded with the UMLS `.RRF` files.
 - run a Bash script to load the RRF files into a MySQL database
 - Run the umls2rdf Python script to dump the MySQL contents to RDF
-
 
 The detailed directions below are optimized for use on a Mac or a Linux computer with a graphical desktop. The same steps could be performed on a Windows PC or a command-line-only Linux environment with a few modifications. Some of the manual steps can even be automated with the [MetaMorphoSys Batch approach](https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html), although creating the required properties files in a plain text editor is complex.
 
