@@ -12,15 +12,7 @@ Most of these steps will take many minutes to roughly one hour.
 ### System notes
 Recent Ubuntu LTS 64 bit server with MySQL server and client software installed. Reader should be comfortable creating MySQL database and users, setting permissions, and managing remote visibility if desired (i.e. access from addresses other than `localhost`). I have been using a `x1e.xlarge`, but there are probably steps below that would benefit from a higher CPU count. 16 GB  (`r5a.large`) is definitely not enough for a dataset the size of SNOMED.
 
-_Currently using MySQL on MacOS: https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.19-macos10.15-x86_64.dmg_
 
-_Installing MariaDB on MacOS requires the use of homebrew?_
-
-_New SHA256 password encryption? Selected old password encryption for compatibility with MySQL 5.x clients._
-
-_With a freshly created MySQL server, it will be necessary to create a new destination database and a user. I have been creating a `@localhost` and a `@'%'` user. I have been doing `GRANT ALL PRIVILEGES ON umls.* TO 'umls' @'%';`, but one could argue for granting fewer privileges._
-
-_It will probably be necessary to set `local_infile=1` in a configuration file like `/etc/my.cnf`_
 
 Download UMLS with curl-uts-download.sh from [terminology_download_script.zip](http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip)
 
