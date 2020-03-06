@@ -133,7 +133,7 @@ The location of the GraphDB import directory can be determined by visiting `http
 
     - connect to the UMLS servers (via a web interface or via REST). Requires a UMLS account.
     - download the UMLS distribution
-    - unpack the UMLS archive into RRF "rich release format" files, and probabliy subset them)with the bundled MetaMorhoSys Java application
+    - unpack the UMLS archive into RRF "rich release format" files (and probabliy subset them) with the bundled MetaMorhoSys Java application
     - run a Bash script to load the RRF files into a MySQL database
     - run the umls2rdf Python script to dump the MySQL contents to RDF
 
