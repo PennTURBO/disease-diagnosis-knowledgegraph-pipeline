@@ -2,13 +2,17 @@
 
 
 
+## Background
+
+
+
 A SNOMED RDF file is required in TURBO disease to diagnosis knowledge graphs. [IHTSD has their own SNOMED/OWL initiative](https://confluence.ihtsdotools.org/display/DOCOWL/SNOMED+CT+OWL+Guide), but TURBO knowledge graphs currently use the [NCBO's BioPortal style for the SNOMED triples](https://bioportal.bioontology.org/ontologies/SNOMEDCT). Unlike many other RDF knowledge assets at the BioPortal, the SNOMED triples are not available for download because they require end-users to agree to the SNOMED license. IHTSD does allow the NLM to redistribute [SNOMED in the Unified Medical Language System](https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/SNOMEDCT_US/index.html), since [accessing the UMLS requires obtaining a license](https://www.nlm.nih.gov/databases/umls.html#license_request).
 
 The SNOMED CT International Edition is currently released twice a year on the 31st of January and the 31st of July. The UMLS, which includes a US-localized version of SNOMED, has a `AA` version which is released in May of each year and a `AB` version in November.
 
-----
 
-At a high level, the steps involved in creating a BioPortal-style SNOMED RDF file are:
+
+## Contents
 
 - obtain a UMLS license if necessary
 - download the UMLS distribution with a web browser or 
