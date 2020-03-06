@@ -129,15 +129,15 @@ The location of the GraphDB import directory can be determined by visiting `http
 
 - The **`icd9_to_snomed.triples.file`** parameter should be set to the path of a file containing an RDF direct mapping of the [National Library of Medicine's ICD9CM/SNOMED mappings](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html). **Contrary to recent claims, these mappings are updated (yearly), and the [disease diagnosis workflow includes a method for regenerating them in a mostly automated fashion](ICD9CM_SNOMED_MAP-to-RDF.md).** A [UMLS license](https://uts.nlm.nih.gov/license.html) is required to obtain the tabular ICD9CM/SNOMED mappings. 
 
-**The `snomed.triples.file`** parameter should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
+- **The `snomed.triples.file`** parameter should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
 
-- connect to the UMLS servers (via a web interface or via REST). Requires a UMLS account.
-- download the UMLS distribution
-- unpack the UMLS archive into RRF "rich release format" files, and probabliy subset them)with the bundled MetaMorhoSys Java application
-- run a Bash script to load the RRF files into a MySQL database
-- run the umls2rdf Python script to dump the MySQL contents to RDF
+    - connect to the UMLS servers (via a web interface or via REST). Requires a UMLS account.
+    - download the UMLS distribution
+    - unpack the UMLS archive into RRF "rich release format" files, and probabliy subset them)with the bundled MetaMorhoSys Java application
+    - run a Bash script to load the RRF files into a MySQL database
+    - run the umls2rdf Python script to dump the MySQL contents to RDF
 
-Detailed directions are avaialble, but the process requires some manual steps and will be slightly different from one platform to another (Windows, Mac, Linux, etc.)
+[Detailed directions are avaialble](SNOMED_RDF_generation.md), but the process requires some manual steps and will be slightly different from one platform to another (Windows, Mac, Linux, etc.)
 
 ## Execution:
 
