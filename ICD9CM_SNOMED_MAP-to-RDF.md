@@ -28,11 +28,11 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 
 `$ sh curl-uts-download.sh https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_201812.zip`
 
-- Even if the authenticaion and downlaod were successful, the script will spew out some HTML. SOmething like
+- Even if the authentication and download were successful, the script will spew out some HTML. Something like
 
 > You have been successfully logged out of the UMLS Terminology Services.
 
-is expected. You can examine the HTML more closely if desired. If ou get a roughly 1 MB zip file, your download was probably successfu.
+is expected. You can examine the HTML more closely if desired. If you get a roughly 1 MB zip file, your download was probably successful.
 
 - Unzip the download to obtain two tab delimited data files like
 
