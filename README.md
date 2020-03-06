@@ -129,29 +129,15 @@ The location of the GraphDB import directory can be determined by visiting `http
 
 - The **`icd9_to_snomed.triples.file`** parameter should be set to the path of a file containing an RDF direct mapping of the [National Library of Medicine's ICD9CM/SNOMED mappings](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html). **Contrary to recent claims, these mappings are updated (yearly), and the [disease diagnosis workflow includes a method for regenerating them in a mostly automated fashion](ICD9CM_SNOMED_MAP-to-RDF.md).** A [UMLS license](https://uts.nlm.nih.gov/license.html) is required to obtain the tabular ICD9CM/SNOMED mappings. 
 
-**`snomed.triples.file`** should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
+**The `snomed.triples.file`** parameter should point to a SNOMED RDF file in Bioportal style. Many RDF files, even those containing UMLS content, are freely available at the NCBO Bioportal (http://bioportal.bioontology.org/). However, SNOMED requires users to agree to terms of use, so the Bioportal does not redistribute their derived SNOMED RDF. Therefore it is necessary to 
 
 - connect to the UMLS servers (via a web interface or via REST). Requires a UMLS account.
 - download the UMLS distribution
-- unpack the UMLS archive into RRF files (and possibly subset them) with the bundled MetaMorhoSys tool
+- unpack the UMLS archive into RRF "rich release format" files, and probabliy subset them)with the bundled MetaMorhoSys Java application
 - run a Bash script to load the RRF files into a MySQL database
 - run the umls2rdf Python script to dump the MySQL contents to RDF
 
-Each of those steps are somewhat complex in their own right. There is ample web documentation for the main phases
-
-- Unpacking with MetaMorphoSys
-  - GUI: https://www.ncbi.nlm.nih.gov/books/NBK9683/
-  - command line: https://www.nlm.nih.gov/research/umls/implementation_resources/community/mmsys/BatchMetaMorphoSys.html
-- Loading into MySQL: https://www.nlm.nih.gov/research/umls/implementation_resources/scripts/README_RRF_MySQL_Output_Stream.html
-- Dumping to RDF with umls2rdf: https://github.com/ncbo/umls2rdf
-
-But little of that documentation is complete or thoroughly up to date. For example, dependencies like installing MySQL or obtaining Python libraries are not addressed.
-
-Building the SNOMED RDF takes lots of disk space and RAM (100 GB+).
-
-More rough documentation for generating SNOMED RDF can be found at https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev_inc_prep.md
-
-
+Detailed directions are avaialble, but the process requires some manual steps and will be slightly different from one platform to another (Windows, Mac, Linux, etc.)
 
 ## Execution:
 
