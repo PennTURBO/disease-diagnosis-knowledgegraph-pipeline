@@ -120,21 +120,11 @@ UMLS releases are roughly 5 GB and will take roughly 20 minutes to download even
 
 `SNOMEDCT_US;SNOMEDCT,SNOMEDCT.ttl,load_on_codes`
 
-
-
-----
-
-
-
-I have had difficulty exporting some sources (like `MTHSPL`) despite multiple different attempts and request for help from NCBO and stackoverflow. 
-
-One also needs to indicate whether the IRIs for UMLS terms should based on their native codes, or on the UMLS assigned CUIs. CUIs are a better choice for linking to other UMLS terms, but codes may be a better choice for connecting to OMOP concepts. Some sources, however, do not have native codes.
-
 - `cd` into the directory that contains the UMLS RRF files and run umls2rdf with its full path
 
 ```BASH
 $ ~/umls2rdf/umls2rdf.py
 ```
 
-Copy the resulting Turtle files into the `graphdb-import` folder on the GraphDB server where they disease to diagnosis repository is going to be constructed.
+Copy the resulting Turtle files into the `graphdb-import` folder on the GraphDB server where the disease to diagnosis repository is going to be constructed.
 
