@@ -11,3 +11,9 @@ COPY disease_diagnosis_dev.R /appsrc/
 WORKDIR /config
 COPY config/disease-repo-config-se.ttl config
 COPY dd_on_pmacs.yaml.template config
+
+#Hayden starting work here
+WORKDIR /appsrc
+RUN yum install unzip
+COPY http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip appsrc
+RUN unzip terminology_download_script.zip
