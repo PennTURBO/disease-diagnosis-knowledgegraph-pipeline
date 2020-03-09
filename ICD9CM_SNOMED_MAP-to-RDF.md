@@ -13,13 +13,13 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 
 - See the `README.txt` file
 - There are lines in `curl-uts-download.sh` where the user can hard-code their UMLS credentials.
-    - `export UTS_USERNAME=`
-    - `export UTS_PASSWORD=`
-    
+  - `export UTS_USERNAME=`
+  - `export UTS_PASSWORD=`
+
 - A safer practice _might_ be commenting out those lines and exporting the assignments in the shell, with history temporarily 
-    - `export UTS_USERNAME=<SECRET>;history -d $(history 1)`
-    - `export UTS_PASSWORD=<SECRET>;history -d $(history 1)`
-    
+  - `export UTS_USERNAME=<SECRET>;history -d $(history 1)`
+  - `export UTS_PASSWORD=<SECRET>;history -d $(history 1)`
+
 - Browse to the [ICD-9 to SNOMED mapping homepage](https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html) to determine the latest mapping file's name, or write a script to scrape it. I don't believe you can even view the landing page without authenticating first. Perhaps the whole authentication, latest-file-identification and download process could be written into some TURBO/Drivetrain method.
 
 - Download the latest SNOMED-ICD9 mappings from the command line with `curl-uts-download.sh` 
@@ -34,13 +34,15 @@ OntoRefine is no longer required to instantiate the tabular ICD-9 to SNOMED mapp
 
 - Unzip the download to obtain two tab delimited data files like
 
- 1. `ICD9CM_SNOMED_MAP_1TO1_<YYYYMM>.txt` (~1 MB)
- 2. `ICD9CM_SNOMED_MAP_1TOM_<YYYYMM>.txt` (~6 MB)
+  1. `ICD9CM_SNOMED_MAP_1TO1_<YYYYMM>.txt` (~1 MB)
+  2. `ICD9CM_SNOMED_MAP_1TOM_<YYYYMM>.txt` (~6 MB)
 
 - Configure `ICD9CM_SNOMED_MAP.yaml` to determine where the tabular mapping files will be found and where the resulting RDF file should be written
 - Use `$ Rscript ICD9CM_SNOMED_MAP-to-RDF.R` to convert the two tab delimited data files to an RDF file. 
-    - Some `NAs introduced by coercion` warnings are expected
-    - The script will run for roughly 15 minutes without any progress indication.
-- Finally, load the RDF file into the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease to diagnosis repository. 
+  - Some `NAs introduced by coercion` warnings are expected
+  - The script will run for roughly 15 minutes without any progress indication.
+- Finally, load the RDF file into the graphdb import folder on the GraphDB server when the disease-to-diagnosis repository will be created. Currently, `disease_diagnosis_dev.R` will clear the repo, load the ICD9CM to SNOMED direct mapping RDF file, and then continue importing ontologies from the web and normalizing relations.
+
+**In the future,** we can add an option for the user to manually clear the repo, manually import  the ICD9CM to SNOMED direct mapping triples to the `https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html` graph in the disease-diagnosis repository, like this:
 
 `curl --data @ICD9CM_SNOMED_MAP.ttl http://server:port/repositories/disease_diagnosis_dev/rdf-graphs/service?graph=https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html -H 'Content-Type:text/turtle'`
