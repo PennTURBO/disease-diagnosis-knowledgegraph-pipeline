@@ -6,7 +6,25 @@ library(tibble)
 library(uuid)
 library(config)
 
-config <- config::get(file = "ICD9CM_SNOMED_MAP-to-RDF.yaml")
+args  <-  commandArgs(trailingOnly=TRUE)
+# print(args)
+# print(file.exists(args[1]))
+# print(getwd())
+
+potential.config.file <- args[1]
+if (file.exists(potential.config.file)) {
+  # if run from command line with Rscript like
+  # `Rscript <script path>/disease_diagnosis_dev.R <config file path>
+  # and <config file path> exists
+  # VALIDITY OF FILE IS NOT CHECKED
+  actual.config.file <- potential.config.file
+} else {
+  # current working directory
+  actual.config.file <- "ICD9CM_SNOMED_MAP-to-RDF.yaml"
+}
+
+
+config <- config::get(file = actual.config.file)
 
 read.snomed.icd9.mapping <- function(mapping.path) {
   ICD9CM_SNOMED_MAP <-
