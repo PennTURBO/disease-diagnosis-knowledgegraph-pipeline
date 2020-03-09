@@ -6,7 +6,7 @@ library(tibble)
 library(uuid)
 library(config)
 
-args  <-  commandArgs(trailingOnly=TRUE)
+args  <-  commandArgs(trailingOnly = TRUE)
 # print(args)
 # print(file.exists(args[1]))
 # print(getwd())
@@ -18,9 +18,15 @@ if (file.exists(potential.config.file)) {
   # and <config file path> exists
   # VALIDITY OF FILE IS NOT CHECKED
   actual.config.file <- potential.config.file
+  print(paste0("Using config file ", actual.config.file))
 } else {
   # current working directory
   actual.config.file <- "ICD9CM_SNOMED_MAP-to-RDF.yaml"
+  print(paste0(
+    "Using default config file ",
+    actual.config.file,
+    " from current directory"
+  ))
 }
 
 
@@ -71,7 +77,7 @@ ICD9CM_SNOMED_MAP_triples <-
   ICD9CM_SNOMED_MAP %>%
   rowid_to_column("subject") %>%
   mutate(subject = paste0("http://example.com/resource/snomed_icd9_mapping/", subject)) %>%
-  gather(predicate, object,-subject)  %>%
+  gather(predicate, object, -subject)  %>%
   mutate(predicate = paste0("http://example.com/resource/", predicate))
 
 ICD9CM_SNOMED_MAP_triples$subject <-
