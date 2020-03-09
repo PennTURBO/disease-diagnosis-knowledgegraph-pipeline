@@ -4,7 +4,7 @@
 
 A knowledge graph with normalized paths from MonDO disease classes to ICD code terms can be inserted into a GraphDB triple store by running:
 
-https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/config/disease_diagnosis_dev.R
+https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R
 
 ## Prerequisites 
 
@@ -114,7 +114,7 @@ The table below provides an elaboration on the dependencies of those explicit im
 
 A template for the configuration file can be found here:
 
-https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/dd_on_pmacs.yaml.template
+https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/config/dd_on_pmacs.yaml.template
 
 One configuration file can be loaded with the specifications for multiple different GraphDB endpoints. One of the specifications must be assigned to the  `selected.gdb.configuration` parameter in the default block, which also sets  some other, non-graphdb-related parameters
 
