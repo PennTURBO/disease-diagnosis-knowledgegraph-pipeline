@@ -27,7 +27,8 @@ library(SPARQL)
 
 
 # SNOMEDCT or SNOMEDCT_US?
-# UMLS uses "SNOMEDCT_US" as their source abbreviation, and that's what umls2rdf URIs use
+# UMLS calls the source "SNOMEDCT_US" 
+# biportal builds their uris like http://purl.bioontology.org/ontology/SNOMEDCT/123037004
 
 # continue re-factoring SPARQL prefixes
 
@@ -59,7 +60,7 @@ library(SPARQL)
 ###
 
 # start by loading
-# snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT_US/
+# snomed from the ums2rdf pipeline into http://purl.bioontology.org/ontology/SNOMEDCT/
 # icd9  from BioPortal
 # icd10 from BioPortal
 # mondo from http://purl.obolibrary.org/obo/mondo.owl into http://purl.obolibrary.org/obo/mondo.owl
@@ -171,7 +172,7 @@ library(SPARQL)
 
 ###
 
-args  <-  commandArgs(trailingOnly=TRUE)
+args  <-  commandArgs(trailingOnly = TRUE)
 # print(args)
 # print(file.exists(args[1]))
 # print(getwd())
@@ -284,18 +285,30 @@ monitor.named.graphs <- function() {
       context.report$results$bindings$contextID$value
     
     # SHOULD THESE BE LEFT AS GLOBALS OR BE SWITCHED TO FUNCTION PARAMETERS?
+    # print(paste0(
+    #   Sys.time(),
+    #   ": '",
+    #   last.post.status,
+    #   "' submitted at ",
+    #   last.post.time
+    # ))
+
     print(paste0(
-      Sys.time(),
-      ": '",
-      last.post.status,
-      "' submitted at ",
+      "Currently ", Sys.time(),
+      ". Last import submitted at ",
       last.post.time
     ))
+
     # print(paste0("Expecting graphs ", expectation, collapse = " ; "))
     # print(paste0("Current graphs ", context.report, collapse = " ; "))
     
-    print(paste0("Expected graphs: ", sort(expectation)))
-    print(paste0("Current graphs:  ", sort(context.report)))
+    pending.graphs <- sort(setdiff(expectation, context.report))
+    
+    # printing pending masks the possibiity that there are undesired graphs in the repo
+    # print(paste0("Expected graphs: ", sort(expectation)))
+    # print(paste0("Current graphs:  ", sort(context.report)))
+    
+    print(paste0("Pending graphs:  ", sort(pending.graphs)))
     
     print(paste0("Next check in ",
                  monitor.pause.seconds,
@@ -380,16 +393,8 @@ sparql.result <-
   SPARQL(
     url =  update.endpoint,
     update = update.statement,
-    curl_args = list(
-      userpwd = paste0(api.user, ":", api.pass),
-      httpauth = 1
-    )
+    curl_args = list(.opts = curlOptions(userpwd = paste0(api.user, ":", api.pass), httpauth = 1L))
   )
-
-# Warning message:
-#   In testCurlOptionsInFormParameters(.params) :
-#   Found possible curl options in form parameters: userpwd, httpauth
-
 expectation <- NULL
 
 monitor.named.graphs()
@@ -527,7 +532,7 @@ update.body <- paste0(
   "fileNames": ["',
   snomed.triples.file,
   '"],
-  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT_US/" }
+  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT/" }
 }'
 )
 
@@ -550,7 +555,7 @@ expectation <-
     "http://purl.obolibrary.org/obo/mondo.owl",
     "http://purl.bioontology.org/ontology/ICD9CM/",
     "http://purl.bioontology.org/ontology/ICD10CM/",
-    "http://purl.bioontology.org/ontology/SNOMEDCT_US/",
+    "http://purl.bioontology.org/ontology/SNOMEDCT/",
     "http://purl.bioontology.org/ontology/STY/",
     "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html"
   )
@@ -654,8 +659,8 @@ where {
         }
         values (?mondoPattern ?rewritePattern) {
             ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
-            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
-            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
             ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -682,8 +687,8 @@ where {
         }
         values (?mondoPattern ?rewritePattern) {
             ("http://linkedlifedata.com/resource/umls/id/" "http://example.com/cui/")
-            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
-            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
+            ("http://identifiers.org/snomedct/" "http://purl.bioontology.org/ontology/SNOMEDCT/")
+            ("http://purl.obolibrary.org/obo/SCTID_" "http://purl.bioontology.org/ontology/SNOMEDCT/")
             ("http://purl.obolibrary.org/obo/ICD10_" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("http://purl.obolibrary.org/obo/ICD9_" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -704,7 +709,7 @@ where {
     graph <http://purl.obolibrary.org/obo/mondo.owl> {
         values (?mondoPattern ?rewritePattern) {
             ("UMLS:" "http://example.com/cui/")
-            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT_US/")
+            ("SCTID:" "http://purl.bioontology.org/ontology/SNOMEDCT/")
             ("ICD10:" "http://purl.bioontology.org/ontology/ICD10CM/")
             ("ICD9:" "http://purl.bioontology.org/ontology/ICD9CM/")
         }
@@ -843,51 +848,51 @@ where {
         ?s ?p ?o
     }
 }',
-"NLM ICD9CM to SNOMED mapping... tag predicates taking booleans" =
-  'insert data {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
-        mydata:IS_NEC mydata:intPlaceholder true .
-        mydata:IS_1-1MAP mydata:intPlaceholder true .
-        mydata:IN_CORE mydata:intPlaceholder true .
-        <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
-    }
-}',
-
-"ints to to bool"=
-  'insert {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
-        ?s ?p ?boolean
-    }
-} where {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        ?p mydata:intPlaceholder true .
-        ?s ?p ?int .
-        filter(datatype(?int)!=xsd:boolean)
-        bind(if(?int = "1", true, false) as ?boolean)
-    }
-}',
-"delete ints" =
-  'delete {
-    ?s ?p ?int .
-} where {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        ?p mydata:intPlaceholder true .
-        ?s ?p ?int .
-        filter(datatype(?int)!=xsd:boolean)
-    }
-}',
-"migrate bools" = 'insert {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
-        ?s ?p ?boolean
-    }
-}
-where {
-    graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
-        ?s ?p ?boolean
-    }
-}',
-"clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
+# "NLM ICD9CM to SNOMED mapping... tag predicates taking booleans" =
+#   'insert data {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         mydata:IS_CURRENT_ICD mydata:intPlaceholder true .
+#         mydata:IS_NEC mydata:intPlaceholder true .
+#         mydata:IS_1-1MAP mydata:intPlaceholder true .
+#         mydata:IN_CORE mydata:intPlaceholder true .
+#         <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> rdfs:comment "NLM ICD9CM to SNOMED mapping, with predicates taking booleans tagged" .
+#     }
+# }',
+# 
+# "ints to to bool"=
+#   'insert {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+#         ?s ?p ?boolean
+#     }
+# } where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?p mydata:intPlaceholder true .
+#         ?s ?p ?int .
+#         filter(datatype(?int)!=xsd:boolean)
+#         bind(if(?int = "1", true, false) as ?boolean)
+#     }
+# }',
+# "delete ints" =
+#   'delete {
+#     ?s ?p ?int .
+# } where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?p mydata:intPlaceholder true .
+#         ?s ?p ?int .
+#         filter(datatype(?int)!=xsd:boolean)
+#     }
+# }',
+# "migrate bools" = 'insert {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
+#         ?s ?p ?boolean
+#     }
+# }
+# where {
+#     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean> {
+#         ?s ?p ?boolean
+#     }
+# }',
+# "clear temp" = 'clear graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html_boolean>',
 
 "materialize ICD9CM to snomed mappings" =
   'insert {
@@ -898,10 +903,10 @@ where {
     graph <https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html> {
         ?s mydata:ICD_CODE	?ICD_CODE	;
            mydata:SNOMED_CID ?SNOMED_CID .
-        bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT_US/", ?SNOMED_CID)) as ?snomed)
+        bind(uri(concat("http://purl.bioontology.org/ontology/SNOMEDCT/", ?SNOMED_CID)) as ?snomed)
         bind(uri(concat("http://purl.bioontology.org/ontology/ICD9CM/", ?ICD_CODE)) as ?icd)
     }
-    graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+    graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
         ?snomed a owl:Class
     }
     graph <http://purl.bioontology.org/ontology/ICD9CM/> {
@@ -1035,9 +1040,9 @@ where {
     }
   }
 where {
-  graph <http://purl.bioontology.org/ontology/SNOMEDCT_US/> {
+  graph <http://purl.bioontology.org/ontology/SNOMEDCT/> {
     # + or * ?
-    ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT_US/64572001> .
+    ?s rdfs:subClassOf* <http://purl.bioontology.org/ontology/SNOMEDCT/64572001> .
     ?sub rdfs:subClassOf* ?s .
   }
 }'
@@ -1166,7 +1171,7 @@ if (delete.isolated.flag) {
 #   it could be a CUI that just isn't present in ICD-X or snomed
 #   http://example.com/cui/C0001139 owl:equivalentClass obo:MONDO_0006635
 #   where the contexts for C0001139 are medra and mesh and ndfrt
-#   obo:MONDO_0037872 owl:equivalentClass http://purl.bioontology.org/ontology/SNOMEDCT_US/26484003 (26484003 is retired)
+#   obo:MONDO_0037872 owl:equivalentClass http://purl.bioontology.org/ontology/SNOMEDCT/26484003 (26484003 is retired)
 #   or it could be a mangled ICD code
 #   obo:MONDO_0006015 mydata:mdbxr http://purl.bioontology.org/ontology/ICD10CM/A39.1+
 
@@ -1298,7 +1303,7 @@ http://example.com/resource/rewrites_MonDO_object
 http://example.com/resource/rewrites_MonDO_subject
 http://purl.bioontology.org/ontology/ICD10CM/
 http://purl.bioontology.org/ontology/ICD9CM/
-http://purl.bioontology.org/ontology/SNOMEDCT_US/
+http://purl.bioontology.org/ontology/SNOMEDCT/
 http://purl.bioontology.org/ontology/STY/
 http://purl.obolibrary.org/obo/mondo.owl
 http://www.itmat.upenn.edu/biobank/cached_mondo_icd_mappings
