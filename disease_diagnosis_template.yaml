@@ -1,19 +1,24 @@
 default:
-  selected.gdb.configuration: 'pennturbo_lightsail_remote'
+  selected.gdb.configuration: 'localhost'
   monitor.pause.seconds: 10
-  bp.api.key: ''
+  bp.api.key: 'SECRET'
   ICD9CM.uri:   "http://data.bioontology.org/ontologies/ICD9CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
   ICD10CM.uri: "http://data.bioontology.org/ontologies/ICD10CM/submissions/17/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
   umls.semantic.types.uri: "http://data.bioontology.org/ontologies/STY/submissions/14/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb"
   debug.flag: false
   delete.isolated.flag: false
-
-pennturbo_lightsail_remote:
+  ICD9CM_SNOMED_MAP_1TO1.path: "terminology_download_script/ICD9CM_SNOMED_MAP_1TO1_201812.txt"
+  ICD9CM_SNOMED_MAP_1TOM.path: "terminology_download_script/ICD9CM_SNOMED_MAP_1TOM_201812.txt"
+  ICD9CM_SNOMED_MAP.filepath:  "ICD9CM_SNOMED_MAP_201812.ttl"
+  
+localhost:
   graphdb.address.port: 'http://localhost:7200'
   selected.repo: 'disease_diagnosis_dev'
-  api.user: 'gdbuser'
-  # works with empty string if graphdb authentication has been disabled
-  #   in the selected.repo
-  api.pass: 'gdbpass'
-  snomed.triples.file: 'SNOMED_2019AB_codeiris.ttl'
-  icd9_to_snomed.triples.file: 'www_nlm_nih_gov_research_umls_mapping_projects_icd9cm_to_snomedct.ttl'
+  api.user: 'graphdb username'
+  # works with empty strings 
+  #   as long as graphdb authentication 
+  #   has been disabled
+  #   or set to free read write in the selected.repo
+  api.pass: 'SECRET'
+  snomed.triples.file: 'SNOMEDCT_2019AB_codes.ttl'
+  icd9_to_snomed.triples.file: 'ICD9CM_SNOMED_MAP_201812.ttl'
