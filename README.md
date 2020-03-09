@@ -4,7 +4,7 @@
 
 A knowledge graph with normalized paths from MonDO disease classes to ICD code terms can be inserted into a GraphDB triple store by running:
 
-https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R
+https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/config/disease_diagnosis_dev.R
 
 ## Prerequisites 
 
