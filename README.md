@@ -110,11 +110,7 @@ The table below provides an elaboration on the dependencies of those explicit im
 
 
 
-**A configuration file is also required for `disease_diagnosis_dev.R` itself. See also _Execution_ below.**
-
-A template for the configuration file can be found here:
-
-https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/dd_on_pmacs.yaml.template
+**[A configuration file](disease_diagnosis_template.yaml) is also required for `disease_diagnosis_dev.R` itself. See also _Execution_ below.**
 
 One configuration file can be loaded with the specifications for multiple different GraphDB endpoints. One of the specifications must be assigned to the  `selected.gdb.configuration` parameter in the default block, which also sets  some other, non-graphdb-related parameters
 
