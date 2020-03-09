@@ -10,7 +10,7 @@ COPY disease_diagnosis_dev.R /appsrc/
 # set up configuration files
 WORKDIR /config
 COPY config/disease-repo-config-se.ttl config
-COPY dd_on_pmacs.yaml.template config
+COPY disease_diagnosis_template.yaml config
 
 #Hayden starting work here
 WORKDIR /appsrc
