@@ -21,7 +21,7 @@ if (file.exists(potential.config.file)) {
   print(paste0("Using config file ", actual.config.file))
 } else {
   # current working directory
-  actual.config.file <- "ICD9CM_SNOMED_MAP-to-RDF.yaml"
+  actual.config.file <- "disease_diagnosis.yaml"
   print(paste0(
     "Using default config file ",
     actual.config.file,

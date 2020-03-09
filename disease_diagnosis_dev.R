@@ -183,9 +183,15 @@ if (file.exists(potential.config.file)) {
   # and <config file path> exists
   # VALIDITY OF FILE IS NOT CHECKED
   actual.config.file <- potential.config.file
+  print(paste0("Using config file ", actual.config.file))
 } else {
   # current working directory
   actual.config.file <- "disease_diagnosis.yaml"
+  print(paste0(
+    "Using default config file ",
+    actual.config.file,
+    " from current directory"
+  ))
 }
 
 config.bootstrap <-
