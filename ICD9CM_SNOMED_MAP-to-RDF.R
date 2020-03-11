@@ -21,7 +21,7 @@ if (file.exists(potential.config.file)) {
   print(paste0("Using config file ", actual.config.file))
 } else {
   # current working directory
-  actual.config.file <- "config/disease_diagnosis.yaml"
+  actual.config.file <- "/config/disease_diagnosis_config.yaml"
   print(paste0(
     "Using default config file ",
     actual.config.file,
