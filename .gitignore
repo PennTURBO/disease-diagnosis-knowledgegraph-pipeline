@@ -1,3 +1,5 @@
 *.yml
 *.yaml
+*.ttl
+*.txt
 ignored.txt

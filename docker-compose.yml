@@ -18,6 +18,9 @@ services:
     build:
       context: .
       dockerfile: docker/builder/Dockerfile
+    volumes:
+      - "./data/:/data"
+    command: bash -c 'sh gen_icd9tosnomed.sh'
     tty: true
     stdin_open: true
     depends_on:
