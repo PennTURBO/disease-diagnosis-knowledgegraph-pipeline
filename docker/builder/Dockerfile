@@ -21,4 +21,9 @@ COPY disease_diagnosis_dev.R .
 COPY ICD9CM_SNOMED_MAP-to-RDF.R .
 COPY gen_icd9tosnomed.sh .
 RUN dos2unix gen_icd9tosnomed.sh
+COPY gen_snomed.sh .
+RUN dos2unix gen_snomed.sh
+COPY metamorphosys_snomed_sample.prop
+COPY 
 ADD http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip .
+RUN unzip terminology_download_script.zip

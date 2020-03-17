@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: docker/graphdb/Dockerfile
+    volumes:
+      - "./data/:/data"
     tty: true
     stdin_open: true
     ports: 
@@ -20,7 +22,7 @@ services:
       dockerfile: docker/builder/Dockerfile
     volumes:
       - "./data/:/data"
-    command: bash -c 'sh gen_icd9tosnomed.sh'
+    command: bash -c 'sh gen_icd9tosnomed.sh && sh gen_snomed.sh'
     tty: true
     stdin_open: true
     depends_on:

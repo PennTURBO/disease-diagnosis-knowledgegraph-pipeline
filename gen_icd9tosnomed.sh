@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# modify app. configuration with appropriate filenames/paths
 CURRYEAR=$(date +"%Y") 
 LASTYEAR=$(($CURRYEAR-1)) 
 SUFFIX=12
@@ -28,11 +27,8 @@ else
 
 		rm -f "/data/snomed-icd9/ICD9CM_SNOMED_MAP_1TO1_$DATESTRING.txt"
 		rm -f "/data/snomed-icd9/ICD9CM_SNOMED_MAP_1TOM_$DATESTRING.txt"
-		echo "files removed"
 
 		# add umls credentials to curl-uts-download.sh
-		unzip terminology_download_script.zip
-		echo "unzipped"
 		USERNAMESTRING=$(sed -n '1p' /config/umls_credentials.yaml) 
 		USERNAME=${USERNAMESTRING#*=}
 		USERNAME=${USERNAME//[$'\t\r\n ']} 
@@ -41,23 +37,19 @@ else
 		PASSWORD=${PASSWORDSTRING#*=} 
 		PASSWORD=${PASSWORD//[$'\t\r\n ']} 
 		sed -i "s/export UTS_PASSWORD=/export UTS_PASSWORD=$PASSWORD/g" curl-uts-download.sh
-		echo "credentials added"
 
 		# run curl-uts-download.sh and unzip downloaded file
 		ICD9TOSNOMEDURL=https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_$LASTYEAR 
 		SUFFIX=12.zip 
 		FULLURL=$ICD9TOSNOMEDURL$SUFFIX 
 		sh curl-uts-download.sh $FULLURL
-		echo "ran download script"
 		NEWFILEPREFIX=ICD9CM_TO_SNOMEDCT_DIAGNOSIS_
 		NEWFILENAME=$NEWFILEPREFIX$LASTYEAR$SUFFIX
 		unzip $NEWFILENAME
-		echo "unzipped"
 
 		# copy downloaded files to mounted /data directory
 		cp ICD9CM_SNOMED_MAP_1TO1_$DATESTRING.txt /data/snomed-icd9/ICD9CM_SNOMED_MAP_1TO1_$DATESTRING.txt
 		cp ICD9CM_SNOMED_MAP_1TOM_$DATESTRING.txt /data/snomed-icd9/ICD9CM_SNOMED_MAP_1TOM_$DATESTRING.txt
-		echo "files copied"
 	
 	fi
 
