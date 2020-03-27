@@ -16,9 +16,11 @@ https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagn
 
 **4. Sign up to receive the GraphDB Free download at https://www.ontotext.com/products/graphdb/graphdb-free/.** This process should be quick. You'll receive an e-mail after signing up which will give you the option to download the standalone server as a .zip file. Once downloaded, put the .zip file in docker/graphdb/.
 
-**5. Run "docker-compose build" on your command line** from the diease_to_diagnosis_code repo. This step will likely take quite some time, as a lot of packages will be downloaded.
+**6. Run "docker-compose build" on your command line** from the diease_to_diagnosis_code repo. This step will likely take quite some time, as a lot of packages will be downloaded.
 
-**6. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
+**6. Update GraphDB free version number** in the file docker/graphdb/Dockerfile. You should see a variable called "ARG version" near the top of the page, set to some default value. If the version of graphDb you downloaded is different, make the necessary change and save the file.
+
+**7. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
 
 ### Building it yourself
 
