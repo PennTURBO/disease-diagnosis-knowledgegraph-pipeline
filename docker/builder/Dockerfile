@@ -7,14 +7,19 @@ RUN ln -s bash /bin/sh.bash
 RUN mv /bin/sh.bash /bin/sh
 
 # import R packages and system libraries
-RUN apt-get update; apt-get -y install curl pkg-config libxml2-dev libcurl4-gnutls-dev libssl-dev librasqal3-dev libraptor2-dev librdf0-dev libv8-dev dos2unix
-RUN Rscript -e 'install.packages(c("config", "httr", "igraph", "SPARQL", "rdflib", "tibble", "uuid", "config"))'
-
-ADD http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip .
-
-RUN apt-get update; apt-get -y install git \
-	    build-essential \
-    	ca-certificates \
+RUN apt-get update; apt-get -y install curl \
+	pkg-config \
+	libxml2-dev \
+	libcurl4-gnutls-dev \
+	libssl-dev \
+	librasqal3-dev \
+	libraptor2-dev \
+	librdf0-dev \
+	libv8-dev \
+	dos2unix \
+	git \
+	build-essential \
+	ca-certificates \
     	gcc \
     	libpq-dev \
     	make \
@@ -25,6 +30,11 @@ RUN apt-get update; apt-get -y install git \
     	default-libmysqlclient-dev \
     	&& apt-get autoremove \
         && apt-get clean
+	
+
+RUN Rscript -e 'install.packages(c("config", "httr", "igraph", "SPARQL", "rdflib", "tibble", "uuid", "config"))'
+
+ADD http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip .
 
 RUN pip install -U "setuptools==3.4.1"
 RUN pip install -U "pip==1.5.4"
