@@ -1,8 +1,8 @@
-*.yml
-*.yaml
 *.ttl
 *.txt
 *.zip
+*.yml
+*.yaml
+
 umls2rdf/
 mysql/
-data/
