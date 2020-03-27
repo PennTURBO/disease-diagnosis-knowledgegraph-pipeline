@@ -1,3 +1,5 @@
+# Run interactively with docker-compose run builder /bin/bash
+
 FROM r-base:3.6.2
 
 # switch to bash from dash
@@ -8,22 +10,25 @@ RUN mv /bin/sh.bash /bin/sh
 RUN apt-get update; apt-get -y install curl pkg-config libxml2-dev libcurl4-gnutls-dev libssl-dev librasqal3-dev libraptor2-dev librdf0-dev libv8-dev dos2unix
 RUN Rscript -e 'install.packages(c("config", "httr", "igraph", "SPARQL", "rdflib", "tibble", "uuid", "config"))'
 
-# set up configuration files
-WORKDIR /config
-COPY config/umls_credentials.yaml .
-COPY config/disease-repo-config-se.ttl .
-COPY config/disease_diagnosis_config.yaml.template .
-RUN cp /config/disease_diagnosis_config.yaml.template disease_diagnosis_config.yaml
-
-# add source files
-WORKDIR /appsrc
-COPY disease_diagnosis_dev.R .
-COPY ICD9CM_SNOMED_MAP-to-RDF.R .
-COPY gen_icd9tosnomed.sh .
-RUN dos2unix gen_icd9tosnomed.sh
-COPY gen_snomed.sh .
-RUN dos2unix gen_snomed.sh
-COPY metamorphosys_snomed_sample.prop
-COPY 
 ADD http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip .
-RUN unzip terminology_download_script.zip
+
+RUN apt-get update; apt-get -y install git \
+	    build-essential \
+    	ca-certificates \
+    	gcc \
+    	libpq-dev \
+    	make \
+    	python-pip \
+    	python2.7 \
+    	python2.7-dev \
+    	ssh \
+    	default-libmysqlclient-dev \
+    	&& apt-get autoremove \
+        && apt-get clean
+
+RUN pip install -U "setuptools==3.4.1"
+RUN pip install -U "pip==1.5.4"
+RUN pip install -U "Mercurial==2.9.1"
+RUN pip install -U "virtualenv==1.11.4"
+#RUN pip install -U "urllib"
+RUN pip install -U "mysqlclient"

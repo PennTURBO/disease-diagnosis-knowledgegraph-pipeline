@@ -2,5 +2,7 @@
 *.yaml
 *.ttl
 *.txt
+*.zip
+umls2rdf/
+mysql/
 data/
-ignored.txt

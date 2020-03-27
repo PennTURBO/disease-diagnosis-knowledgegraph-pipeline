@@ -10,7 +10,7 @@ CLASSPATH=${MMSYS_HOME}:$MMSYS_HOME/lib/jpf-boot.jar
 # Specify JAVA_HOME
 JAVA_HOME=$MMSYS_HOME/jre/linux
 # Specify configuration file
-CONFIG_FILE=./metamorphosys_sample.prop
+CONFIG_FILE=/config/metamorphosys_snomed.prop
 # Run Batch MetamorphoSys
 export METADIR
 export DESTDIR

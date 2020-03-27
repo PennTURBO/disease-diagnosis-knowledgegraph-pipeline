@@ -187,7 +187,7 @@ if (file.exists(potential.config.file)) {
   print(paste0("Using config file ", actual.config.file))
 } else {
   # current working directory
-  actual.config.file <- "disease_diagnosis.yaml"
+  actual.config.file <- "/config/disease_diagnosis_config.yaml"
   print(paste0(
     "Using default config file ",
     actual.config.file,
@@ -399,6 +399,51 @@ expectation <- NULL
 
 monitor.named.graphs()
 
+### icd9<->snomed mappings from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html,
+# direct-map instantiated with OntoRefine, and saved to turtle file
+# named graph?
+
+update.body <- paste0(
+  '{
+  "fileNames": ["',
+  icd9_to_snomed.triples.file,
+  '"],
+  "importSettings": { "context": "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html" }
+}'
+)
+
+post.res <- POST(
+  filesystem.post.endpoint,
+  body = update.body,
+  content_type("application/json"),
+  accept("application/json"),
+  saved.authentication
+)
+
+# ### snomed
+# # use umls2rdf pipeline and save on local filesystem
+# # DOCUMENTATION  = https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev_inc_prep.md
+
+update.body <- paste0(
+  '{
+  "fileNames": ["',
+  snomed.triples.file,
+  '"],
+  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT/" }
+}'
+)
+
+post.res <- POST(
+  filesystem.post.endpoint,
+  body = update.body,
+  content_type("application/json"),
+  accept("application/json"),
+  saved.authentication
+)
+
+last.post.status <- rawToChar(post.res$content)
+last.post.time <- Sys.time()
+
 ### MONDO
 
 update.body <- '{
@@ -501,52 +546,6 @@ post.res <- POST(
 
 last.post.status <- rawToChar(post.res$content)
 last.post.time <- Sys.time()
-
-### icd9<->snomed mappings from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html,
-# direct-map instantiated with OntoRefine, and saved to turtle file
-# named graph?
-
-update.body <- paste0(
-  '{
-  "fileNames": ["',
-  icd9_to_snomed.triples.file,
-  '"],
-  "importSettings": { "context": "https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html" }
-}'
-)
-
-post.res <- POST(
-  filesystem.post.endpoint,
-  body = update.body,
-  content_type("application/json"),
-  accept("application/json"),
-  saved.authentication
-)
-
-# ### snomed
-# # use umls2rdf pipeline and save on local filesystem
-# # DOCUMENTATION  = https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev_inc_prep.md
-
-update.body <- paste0(
-  '{
-  "fileNames": ["',
-  snomed.triples.file,
-  '"],
-  "importSettings": { "context": "http://purl.bioontology.org/ontology/SNOMEDCT/" }
-}'
-)
-
-post.res <- POST(
-  filesystem.post.endpoint,
-  body = update.body,
-  content_type("application/json"),
-  accept("application/json"),
-  saved.authentication
-)
-
-last.post.status <- rawToChar(post.res$content)
-last.post.time <- Sys.time()
-
 
 ###
 

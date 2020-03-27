@@ -7,14 +7,27 @@ services:
       context: .
       dockerfile: docker/graphdb/Dockerfile
     volumes:
-      - "./data/:/data"
+      - "./data/graphdb-import:/root/graphdb-import"
     tty: true
     stdin_open: true
     ports: 
       - "7200:7200"
-    #volumes:
-    #  - "./config:/config"
 
+  mysql:
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    volumes:
+      - "./data:/var/lib/mysql"
+      - "./config:/config"
+      - "./scripts:/scripts"
+    command: bash -c 'dos2unix scripts/umls2MySql.sh && sh scripts/umls2MySql.sh'
+    tty: true
+    stdin_open: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'umls_db'
 
   builder:
     build:
@@ -22,7 +35,10 @@ services:
       dockerfile: docker/builder/Dockerfile
     volumes:
       - "./data/:/data"
-    command: bash -c 'sh gen_icd9tosnomed.sh && sh gen_snomed.sh'
+      - "./config:/config"
+      - "./scripts:/scripts"
+      - "./R:/R"
+    command: bash -c 'dos2unix scripts/master_builder.sh && sh scripts/master_builder.sh'
     tty: true
     stdin_open: true
     depends_on:

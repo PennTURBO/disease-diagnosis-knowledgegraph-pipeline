@@ -7,7 +7,6 @@
 @prefix owlim: <http://www.ontotext.com/trree/owlim#>.
 
 [] a rep:Repository ;
-    rep:repositoryID "graphdb-test" ;
     rep:repositoryID "disease_diagnosis_dev" ;
     rep:repositoryImpl [
         rep:repositoryType "owlim:MonitorRepository" ;
@@ -20,7 +19,7 @@
             owlim:entity-id-size  "32" ;
             owlim:imports "" ;
             owlim:repository-type "file-repository" ;
-            owlim:ruleset "rdfsplus-optimized" ;
+            owlim:ruleset "empty" ;
             owlim:storage-folder "storage" ;
 
             owlim:enable-context-index "false" ;
