@@ -5,3 +5,4 @@
 *.yaml
 
 umls2rdf/
+terminology_download_script/
