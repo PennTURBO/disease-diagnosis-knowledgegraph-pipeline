@@ -27,8 +27,6 @@ find /scripts -type f -exec dos2unix -k -s -o {} ';'
 find /R -type f -exec dos2unix -k -s -o {} ';'
 
 # get usernames/passwords
-cp /config/disease_diagnosis_credentials.yaml.template /config/disease_diagnosis_credentials.yaml
-
 USERNAMESTRING=$(grep '^UMLSusername=' /config/disease_diagnosis_credentials.yaml) 
 UMLSUSERNAME=${USERNAMESTRING#*=}
 UMLSUSERNAME=${UMLSUSERNAME//[$'\t\r\n ']} 
