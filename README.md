@@ -12,13 +12,15 @@ https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagn
 
 **2. Ensure you have a UMLS license.** If you don't have one, sign up for one here: https://uts.nlm.nih.gov/license.html. It can take a few days to obtain the license.
 
-**3. In the config/ directory, copy disease_diagnosis_credentials.template to disease_diagnosis_credentials.yaml.** Then insert your valid UMLS credentials and a username/password for the MySQL database (can be anything) into disease_diagnosis_credentials.yaml. Make sure not to leave any extraneous spaces.
+**3. In the config/ directory, copy disease_diagnosis_credentials.yaml.template to disease_diagnosis_credentials.yaml.** Then insert your valid UMLS credentials and a username/password for the MySQL database (can be anything) into disease_diagnosis_credentials.yaml. Make sure not to leave any extraneous spaces.
 
 **4. Sign up to receive the GraphDB Free download at https://www.ontotext.com/products/graphdb/graphdb-free/.** This process should be quick. You'll receive an e-mail after signing up which will give you the option to download the standalone server as a .zip file. Once downloaded, put the .zip file in docker/graphdb/.
 
-**5. Run "docker-compose build" on your command line** from the diease_to_diagnosis_code repo. This step will likely take quite some time, as a lot of packages will be downloaded.
+**5. Update GraphDB Free version number** in the file docker/graphdb/Dockerfile. You should see a line starting with "ARG version" near the top of the page, set to some default value. If the version of graphDb you downloaded is different, make the necessary change and save the file.
 
-**6. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
+**6. Run "docker-compose build" on your command line** from the diease_to_diagnosis_code repo. This step will likely take quite some time, as a lot of packages will be downloaded. Or, skip directly to the next step which will automatically trigger the build if not done already.
+
+**7. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
 
 ### Building it yourself
 
