@@ -40,6 +40,8 @@ tail ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl
 ls -la
 
 # move generated file to mounted /data folder
+rm -rf /data/snomed-icd9/RDF/
+mkdir /data/snomed-icd9/RDF/
 mv ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl /data/snomed-icd9/RDF/ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl
 # copy to graphdb-import directory
 cp /data/snomed-icd9/RDF/ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl /data/graphdb-import/ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl

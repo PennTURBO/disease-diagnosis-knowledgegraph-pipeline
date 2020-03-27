@@ -43,4 +43,4 @@ services:
     stdin_open: true
     depends_on:
       - graphdb
-
+      - mysql

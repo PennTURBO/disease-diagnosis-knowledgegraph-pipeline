@@ -30,9 +30,9 @@ else
 
 	chmod -R 777 /data/umls-snomed/current_umls
 
-	mkdir RRF/
-	mkdir RRF/META
-	touch RRF/META/mmsys.log
+	mkdir /data/umls-snomed/current_umls/RRF/
+	mkdir /data/umls-snomed/current_umls/RRF/META
+	touch /data/umls-snomed/current_umls/RRF/META/mmsys.log
 
 	cp /config/metamorphosys_snomed_sample.prop /config/metamorphosys_snomed.prop
 	cp /scripts/metamorphosys_batch.sh.template /scripts/metamorphosys_batch.sh

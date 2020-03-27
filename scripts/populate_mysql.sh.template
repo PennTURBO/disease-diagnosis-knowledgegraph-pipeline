@@ -46,7 +46,7 @@ if [ ! -f MRCXT.RRF ]; then `touch MRCXT.RRF`; fi
 
 $MYSQL_HOME/bin/mysql -vvv -u root -e "DROP DATABASE $db_name;" >> mysql.log 2>&1
 $MYSQL_HOME/bin/mysql -vvv -u root -e "CREATE USER IF NOT EXISTS '$user'@'%' IDENTIFIED BY '$password';" >> mysql.log 2>&1
-$MYSQL_HOME/bin/mysql -vvv -u root -e "GRANT ALL PRIVILEGES ON umls_db.* TO '$user' @'localhost'" >> mysql.log 2>&1
+$MYSQL_HOME/bin/mysql -vvv -u root -e "GRANT ALL PRIVILEGES ON umls_db.* TO '$user'@'%'" >> mysql.log 2>&1
 $MYSQL_HOME/bin/mysql -vvv -u root -e "FLUSH PRIVILEGES" >> mysql.log 2>&1
 $MYSQL_HOME/bin/mysql -vvv -u root -e "CREATE DATABASE $db_name;" >> mysql.log 2>&1
 

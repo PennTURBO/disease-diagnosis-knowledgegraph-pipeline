@@ -30,7 +30,7 @@ sed -i 's@DB_HOST = "your-host"@DB_HOST = "mysql"@g' conf.py
 sed -i 's@DB_NAME = "umls2015ab"@DB_NAME = "umls_db"@g' conf.py
 sed -i "s@DB_USER = \"your db user\"@DB_USER = \"$MYSQLUSERNAME\"@g" conf.py
 sed -i "s@DB_PASS = \"your db pass\"@DB_PASS = \"$MYSQLPASSWORD\"@g" conf.py
-sed -i "s@UMLS_VERSION = \"2015ab\"@UMLS_VERSION = \"$DATESTRING\"@g" conf.py
+sed -i "s@UMLS_VERSION = \"2015ab\"@UMLS_VERSION = \"$SNOMEDDATESTRING\"@g" conf.py
 sed -i 's@INCLUDE_SEMANTIC_TYPES = True@INCLUDE_SEMANTIC_TYPES = False@g' conf.py
 
 python umls2rdf.py
