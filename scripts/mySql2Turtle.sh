@@ -16,13 +16,14 @@ cd /data/umls-snomed/current_umls
 rm -rf RDF
 mkdir RDF
 
+cd umls2rdf
+
+rm -rf conf.py
+cp conf_sample.py conf.py 
+
 rm -rf umls.conf
 touch umls.conf
 echo "SNOMEDCT_US;SNOMEDCT,SNOMEDCT.ttl,load_on_codes" >> umls.conf
-
-cd umls2rdf
-rm -rf conf.py
-cp conf_sample.py conf.py 
 
 sed -i 's@OUTPUT_FOLDER = "output"@OUTPUT_FOLDER = "/data/umls-snomed/current_umls/RDF"@g' conf.py
 sed -i 's@DB_HOST = "your-host"@DB_HOST = "mysql"@g' conf.py
