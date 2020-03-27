@@ -88,9 +88,9 @@ else
 	. ./mySql2Turtle.sh
 
 	# tell mysql container to shutdown
-	touch /var/lib/mysql/umls_snomed/current_umls/RRF/mySqlQuit.txt
+	touch /data/umls-snomed/current_umls/RRF/mySqlQuit.txt
 	sleep 10
-	rm /var/lib/mysql/umls_snomed/current_umls/RRF/mySqlQuit.txt
+	rm /data/umls-snomed/current_umls/RRF/mySqlQuit.txt
 
 fi
 

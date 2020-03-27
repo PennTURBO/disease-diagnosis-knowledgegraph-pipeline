@@ -36,6 +36,6 @@ python umls2rdf.py
 echo "finished umls2rdf script"
 
 # copy files to graphdb-import directory and rename to be date-specific
-cp /data/umls-snomed/current_umls/RDF/SNOMEDCT.ttl /data/graphdb-import/SNOMEDCT_$DATESTRING.ttl
+cp /data/umls-snomed/current_umls/RDF/SNOMEDCT.ttl /data/graphdb-import/SNOMEDCT_$SNOMEDDATESTRING.ttl
 
 cd /scripts
