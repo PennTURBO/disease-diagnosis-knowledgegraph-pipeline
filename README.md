@@ -22,6 +22,16 @@ https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagn
 
 **7. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
 
+Throughout the build, you will see repeated messages of:
+
+`mysql is awaiting completion of the RRF generation process. Checking again in 60 seconds...`
+
+and later,
+
+`builder is awaiting completion of the mysql process. Checking again in 60 seconds...`
+
+This is normal and expected. See Issue #2 for why this is happening and how it can be improved.
+
 ### Building it yourself
 
 ## Prerequisites 
