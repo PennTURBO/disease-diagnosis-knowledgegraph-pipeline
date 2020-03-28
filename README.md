@@ -30,7 +30,7 @@ and later,
 
 `builder is awaiting completion of the mysql process. Checking again in 60 seconds...`
 
-This is normal and expected. See Issue #2 for why this is happening and how it can be improved.
+This is normal and expected. See [Issue #2](https://github.com/PennTURBO/disease_to_diagnosis_code/issues/2) for why this is happening and how it can be improved.
 
 ### Building it yourself
 
