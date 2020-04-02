@@ -1,10 +1,38 @@
 # Building a TURBO disease/diagnosis knowledge graph
 
-## Background
+### Background
 
 A knowledge graph with normalized paths from MonDO disease classes to ICD code terms can be inserted into a GraphDB triple store by running:
 
 https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagnosis_dev.R
+
+### Running with pre-built Docker configuration
+
+**1. Clone this repository to the machine you'd like to run the script.** To be safe, it should have 100 GB of free disk space and at minimum 25 GB of RAM available. You will need to have docker-compose installed.
+
+**2. Ensure you have a UMLS license.** If you don't have one, sign up for one here: https://uts.nlm.nih.gov/license.html. It can take a few days to obtain the license.
+
+**3. In the config/ directory, copy disease_diagnosis_credentials.yaml.template to disease_diagnosis_credentials.yaml.** Then insert your valid UMLS credentials and a username/password for the MySQL database (can be anything) into disease_diagnosis_credentials.yaml. Make sure not to leave any extraneous spaces.
+
+**4. Sign up to receive the GraphDB Free download at https://www.ontotext.com/products/graphdb/graphdb-free/.** This process should be quick. You'll receive an e-mail after signing up which will give you the option to download the standalone server as a .zip file. Once downloaded, put the .zip file in docker/graphdb/.
+
+**5. Update GraphDB Free version number** in the file docker/graphdb/Dockerfile. You should see a line starting with "ARG version" near the top of the page, set to some default value. If the version of graphDb you downloaded is different, make the necessary change and save the file.
+
+**6. Run "docker-compose build" on your command line** from the diease_to_diagnosis_code repo. This step will likely take quite some time, as a lot of packages will be downloaded. Or, skip directly to the next step which will automatically trigger the build if not done already.
+
+**7. Run "docker-compose up" on your command line** from the diease_to_diagnosis_code repo once the project is built. The pipeline will begin and will run for several hours. Once it completes, you should have a ready-to-use Disease-to-Diagnosis knowledge graph available at localhost:7200.
+
+Throughout the build, you will see repeated messages of:
+
+`mysql is awaiting completion of the RRF generation process. Checking again in 60 seconds...`
+
+and later,
+
+`builder is awaiting completion of the mysql process. Checking again in 60 seconds...`
+
+This is normal and expected. See [Issue #2](https://github.com/PennTURBO/disease_to_diagnosis_code/issues/2) for why this is happening and how it can be improved.
+
+### Building it yourself
 
 ## Prerequisites 
 

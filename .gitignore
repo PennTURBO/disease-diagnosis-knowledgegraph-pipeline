@@ -1,5 +1,8 @@
-disease_diagnosis.yaml
-disease_diagnosis.yml
-ICD9CM_SNOMED_MAP-to-RDF.yaml
-ICD9CM_SNOMED_MAP-to-RDF.yml
-ignored.txt
+*.ttl
+*.txt
+*.zip
+*.yml
+*.yaml
+
+umls2rdf/
+terminology_download_script/
