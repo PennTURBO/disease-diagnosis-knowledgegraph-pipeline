@@ -38,7 +38,7 @@ RUN apt-get update; apt-get -y install python-pip-whl=9.0.1-2+deb9u1 \
 	python2.7-dev \
 	ssh \
 	default-libmysqlclient-dev \
-	&& apt-get autoremove \
+	&& apt-get -y autoremove \
     && apt-get clean
 	
 # load R packages
