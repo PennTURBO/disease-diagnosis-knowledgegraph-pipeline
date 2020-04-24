@@ -1,8 +1,0 @@
-"","Package","LibPath","Version","Priority","Depends","Imports","LinkingTo","Suggests","Enhances","License","License_is_FOSS","License_restricts_use","OS_type","MD5sum","NeedsCompilation","Built"
-"config","config","/Library/Frameworks/R.framework/Versions/3.6/Resources/library","0.3",NA,NA,"yaml (>= 2.1.13)",NA,"testthat, knitr",NA,"GPL-3",NA,NA,NA,NA,"no","3.6.2"
-"httr","httr","/Library/Frameworks/R.framework/Versions/3.6/Resources/library","1.4.1",NA,"R (>= 3.2)","curl (>= 3.0.0), jsonlite, mime, openssl (>= 0.8), R6",NA,"covr, httpuv, jpeg, knitr, png, readr, rmarkdown, testthat
-(>= 0.8.0), xml2",NA,"MIT + file LICENSE",NA,NA,NA,NA,"no","3.6.2"
-"igraph","igraph","/Library/Frameworks/R.framework/Versions/3.6/Resources/library","1.2.4.2",NA,"methods","graphics, grDevices, magrittr, Matrix, pkgconfig (>= 2.0.0),
-stats, utils",NA,"ape, digest, graph, igraphdata, rgl, scales, stats4, tcltk,
-testthat",NA,"GPL (>= 2)",NA,NA,NA,NA,"yes","3.6.0"
-"SPARQL","SPARQL","/Library/Frameworks/R.framework/Versions/3.6/Resources/library","1.16",NA,"XML, RCurl",NA,NA,NA,NA,"GPL-3",NA,NA,NA,NA,"no","3.6.2"

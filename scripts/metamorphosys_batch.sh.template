@@ -1,0 +1,23 @@
+#!/bin/sh -f
+# Specify directory containing .RRF or .nlm files
+METADIR=/data/umls-snomed/
+# Specify output directory
+DESTDIR=/data/umls-snomed/
+# Specify MetamorphoSys directory
+MMSYS_HOME=/data/umls-snomed/
+# Specify CLASSPATH
+CLASSPATH=${MMSYS_HOME}:$MMSYS_HOME/lib/jpf-boot.jar
+# Specify JAVA_HOME
+JAVA_HOME=$MMSYS_HOME/jre/linux
+# Specify configuration file
+CONFIG_FILE=/config/metamorphosys_snomed.prop
+# Run Batch MetamorphoSys
+export METADIR
+export DESTDIR
+export MMSYS_HOME
+export CLASSPATH
+export JAVA_HOME
+cd $MMSYS_HOME
+$JAVA_HOME/bin/java -Djava.awt.headless=true -Djpf.boot.config=$MMSYS_HOME/etc/subset.boot.properties \
+-Dlog4j.configuration=$MMSYS_HOME/etc/subset.log4j.properties -Dinput.uri=$METADIR \
+-Doutput.uri=$DESTDIR -Dmmsys.config.uri=$CONFIG_FILE -Xms300M -Xmx1000M org.java.plugin.boot.Boot
