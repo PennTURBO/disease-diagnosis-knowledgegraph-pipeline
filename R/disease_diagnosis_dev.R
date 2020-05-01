@@ -394,7 +394,6 @@ post.res <- POST(
 last.post.status <- rawToChar(post.res$content)
 last.post.time <- Sys.time()
 
-<<<<<<< HEAD:disease_diagnosis_dev.R
 ### icd9<->snomed mappings from https://www.nlm.nih.gov/research/umls/mapping_projects/icd9cm_to_snomedct.html,
 # direct-map instantiated with OntoRefine, and saved to turtle file
 # named graph?
@@ -439,11 +438,6 @@ post.res <- POST(
 
 last.post.status <- rawToChar(post.res$content)
 last.post.time <- Sys.time()
-
-
-=======
->>>>>>> fcc2d11b75c5ac9679143c47aad564112c10abe8:R/disease_diagnosis_dev.R
-###
 
 expectation <-
   c(
