@@ -81,7 +81,7 @@ ICD9CM_SNOMED_MAP_triples <-
   mutate(predicate = paste0("http://example.com/resource/", predicate))
 
 ICD9CM_SNOMED_MAP_triples$subject <-
-  paste0("http://example.com/resource/", UUIDgenerate(n = nrow(ICD9CM_SNOMED_MAP)))
+  paste0("http://example.com/resource/", UUIDgenerate(n = nrow(ICD9CM_SNOMED_MAP_triples)))
 
 # nrow(ICD9CM_SNOMED_MAP_triples)
 rdf <- rdf()
