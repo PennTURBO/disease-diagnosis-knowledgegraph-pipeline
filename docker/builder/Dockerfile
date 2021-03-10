@@ -15,7 +15,7 @@ RUN echo "deb http://deb.debian.org/debian stretch-updates main" >> /etc/apt/sou
 RUN echo "deb-src http://deb.debian.org/debian stretch-updates main" >> /etc/apt/sources.list
 
 # install system libraries
-RUN apt-get update; apt-get -y install python-pip-whl=9.0.1-2+deb9u1 \
+RUN apt-get update; apt-get -y install python-pip-whl=9.0.1-2+deb9u2 \
     python-pip \
     curl \
 	pkg-config \
@@ -40,7 +40,7 @@ RUN apt-get update; apt-get -y install python-pip-whl=9.0.1-2+deb9u1 \
 	default-libmysqlclient-dev \
 	&& apt-get -y autoremove \
     && apt-get clean
-	
+
 # load R packages
 RUN Rscript -e 'install.packages(c("config", "httr", "igraph", "SPARQL", "rdflib", "tibble", "uuid", "config"))'
 
@@ -52,4 +52,4 @@ RUN pip install -U "setuptools==3.4.1"
 RUN pip install -U "pip==1.5.4"
 RUN pip install -U "Mercurial==2.9.1"
 RUN pip install -U "virtualenv==1.11.4"
-RUN pip install -U "mysqlclient"
+RUN pip install -U "mysqlclient==1.4.6"

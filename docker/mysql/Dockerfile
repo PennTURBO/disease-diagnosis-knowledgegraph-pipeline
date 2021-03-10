@@ -1,7 +1,7 @@
 # Run interactively with docker-compose run mysql /bin/bash
 
 #FROM mysql:8
-FROM mariadb:latest
+FROM mariadb:5.5.64
 
 RUN apt-get update; \
 	apt-get -y install \
