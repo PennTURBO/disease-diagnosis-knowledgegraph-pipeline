@@ -44,9 +44,6 @@ RUN apt-get update; apt-get -y install python-pip-whl=9.0.1-2+deb9u2 \
 # load R packages
 RUN Rscript -e 'install.packages(c("config", "httr", "igraph", "SPARQL", "rdflib", "tibble", "uuid", "config"))'
 
-# download UMLS terminology download script
-ADD http://download.nlm.nih.gov/rxnorm/terminology_download_script.zip .
-
 # install python tools
 RUN pip install -U "setuptools==3.4.1"
 RUN pip install -U "pip==1.5.4"

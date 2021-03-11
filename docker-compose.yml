@@ -28,6 +28,8 @@ services:
       - "3306:3306"
     environment:
       MYSQL_DATABASE: 'umls_db'
+    env_file:
+      - ./config/config.env
 
   builder:
     build:
@@ -41,6 +43,8 @@ services:
     command: bash -c 'dos2unix scripts/master_builder.sh && sh scripts/master_builder.sh'
     tty: true
     stdin_open: true
+    env_file:
+      - ./config/config.env
     depends_on:
       - graphdb
       - mysql

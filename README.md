@@ -12,7 +12,7 @@ https://github.com/PennTURBO/disease_to_diagnosis_code/blob/master/disease_diagn
 
 **2. Ensure you have a UMLS license.** If you don't have one, sign up for one here: https://uts.nlm.nih.gov/license.html. It can take a few days to obtain the license.
 
-**3. In the config/ directory, copy disease_diagnosis_credentials.yaml.template to disease_diagnosis_credentials.yaml.** Then insert your valid UMLS credentials and a username/password for the MySQL database (can be anything) into disease_diagnosis_credentials.yaml. Make sure not to leave any extraneous spaces.
+**3. In the config/ directory, copy config.env.template to config.env.** Then insert your valid UMLS credentials and a username/password for the MySQL database (can be anything) into config.env. Make sure not to leave any extraneous spaces.
 
 **4. Sign up to receive the GraphDB Free download at https://www.ontotext.com/products/graphdb/graphdb-free/.** This process should be quick. You'll receive an e-mail after signing up which will give you the option to download the standalone server as a .zip file. Once downloaded, put the .zip file in docker/graphdb/.
 

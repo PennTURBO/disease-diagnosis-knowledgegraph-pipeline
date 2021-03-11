@@ -3,6 +3,8 @@
 *.zip
 *.yml
 *.yaml
+*.env
 
 umls2rdf/
 terminology_download_script/
+build/

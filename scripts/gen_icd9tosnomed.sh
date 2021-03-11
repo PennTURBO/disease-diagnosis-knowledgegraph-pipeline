@@ -2,6 +2,8 @@
 
 cd /data/snomed-icd9
 
+echo "- STARTING gen_icd9tosnomed.sh"
+
 if [ -f "/data/snomed-icd9/ICD9CM_SNOMED_MAP_1TO1_$ICDTOSNOMEDDATESTRING.txt" ] && [ -f "/data/snomed-icd9/ICD9CM_SNOMED_MAP_1TOM_$ICDTOSNOMEDDATESTRING.txt" ]; then
 
 	echo "ICD9CM_SNOMED_MAP_1TO1_$ICDTOSNOMEDDATESTRING.txt and ICD9CM_SNOMED_MAP_1TOM_$ICDTOSNOMEDDATESTRING.txt already exist in /data/snomed-icd9/"
@@ -18,7 +20,7 @@ else
 	ICD9TOSNOMEDURL=https://download.nlm.nih.gov/umls/kss/mappings/ICD9CM_TO_SNOMEDCT/ICD9CM_TO_SNOMEDCT_DIAGNOSIS_$LASTYEAR 
 	SUFFIX=12.zip 
 	FULLURL=$ICD9TOSNOMEDURL$SUFFIX 
-	sh /scripts/terminology_download_script/curl-uts-download.sh $FULLURL
+	sh /scripts/build/curl-uts-downloads-apikey.sh $FULLURL
 	NEWFILEPREFIX=ICD9CM_TO_SNOMEDCT_DIAGNOSIS_
 	NEWFILENAME=$NEWFILEPREFIX$LASTYEAR$SUFFIX
 	unzip $NEWFILENAME
@@ -47,3 +49,5 @@ mv ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl /data/snomed-icd9/RDF/ICD9CM_SNO
 cp /data/snomed-icd9/RDF/ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl /data/graphdb-import/ICD9CM_SNOMED_MAP_$ICDTOSNOMEDDATESTRING.ttl
 
 cd /scripts
+
+echo "- FINISHED gen_icd9tosnomed.sh"

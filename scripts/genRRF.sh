@@ -18,7 +18,7 @@ else
 	echo "Directory $FILENAME does not exist with RRF subdirectory in /data/umls-snomed"
 
 	echo "Downloading large umls file"
-	sh /scripts/terminology_download_script/curl-uts-download.sh $FULLURI
+	sh /scripts/build/curl-uts-downloads-apikey.sh $FULLURI
 	echo "UMLS download complete"
 	unzip umls-$FILENAME.zip
 
